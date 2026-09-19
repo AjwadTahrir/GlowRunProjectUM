@@ -1,0 +1,38 @@
+{
+  "name": "witches-glow-run-server",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "migrate:test": "cross-env NODE_ENV=test tsx src/scripts/migrate.ts",
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "migrate": "tsx src/scripts/migrate.ts",
+    "sheets:init": "tsx src/scripts/sheets-init.ts",
+    "sheets:reconcile": "tsx src/scripts/sheets-reconcile.ts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.637.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.4.0",
+    "googleapis": "^144.0.0",
+    "helmet": "^7.1.0",
+    "multer": "^1.4.5-lts.1",
+    "pg": "^8.12.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/multer": "^1.4.11",
+    "@types/node": "^20.14.0",
+    "@types/pg": "^8.11.6",
+    "@types/supertest": "^6.0.2",
+    "supertest": "^7.0.0",
+    "tsx": "^4.16.0",
+    "typescript": "^5.5.4",
+    "vitest": "^2.0.5"
+  }
+}

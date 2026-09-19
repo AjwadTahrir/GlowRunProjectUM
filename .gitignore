@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.env
+.env.local
+.private-uploads/
+*.log
+service-account*.json
