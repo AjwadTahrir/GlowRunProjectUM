@@ -27,13 +27,38 @@ type UploadState =
   | { phase: 'ready'; name: string; ref: string }
   | { phase: 'error'; name: string; message: string };
 
-/** A numbered part of the form. Editorial markers, not a multi-screen wizard. */
-function Part({ index, title, children }: { index: string; title: string; children: React.ReactNode }) {
+/**
+ * A numbered part of the form: a stop on the route, joined to the next by the trail.
+ * Editorial markers, not a multi-screen wizard.
+ */
+function Part({
+  index,
+  title,
+  last = false,
+  children,
+}: {
+  index: string;
+  title: string;
+  last?: boolean;
+  children: React.ReactNode;
+}) {
   return (
-    <fieldset className="border-t border-paper/25 pt-8">
+    <fieldset className="relative pl-14 md:pl-20">
       <legend className="sr-only">{title}</legend>
-      <div aria-hidden className="mb-8 flex items-baseline gap-4">
-        <span className="figure text-sm text-gold">{index}</span>
+      <span
+        aria-hidden
+        className="absolute left-0 top-0 grid h-10 w-10 place-items-center rounded-full bg-gold font-mono text-sm font-medium text-ink"
+      >
+        {index}
+      </span>
+      {!last && (
+        <span
+          aria-hidden
+          className="absolute -bottom-14 left-[18px] top-10 w-[4px] bg-gold"
+          style={{ boxShadow: '4px 4px 0 var(--lavender)' }}
+        />
+      )}
+      <div aria-hidden className="mb-8 flex h-10 items-center">
         <span className="display display-s">{title}</span>
       </div>
       <div className="space-y-9">{children}</div>
@@ -152,7 +177,8 @@ export function RegistrationForm({
           name={fullName}
           category={CATEGORIES.includes(category as Category) ? (category as Category) : undefined}
           size={tshirtSize || undefined}
-          className="mx-auto w-full max-w-[26rem] lg:max-w-none"
+          className="tilt mx-auto w-full max-w-[26rem] lg:max-w-none"
+          style={{ ['--tilt' as string]: '2deg' } as React.CSSProperties}
         />
         <p className="hint mx-auto mt-4 max-w-[26rem] lg:mx-0 lg:max-w-[34ch]">
           Your bib fills in as you type. The number is assigned when the server accepts your registration.
@@ -323,7 +349,7 @@ export function RegistrationForm({
           </div>
         </Part>
 
-        <Part index="04" title="Payment">
+        <Part index="04" title="Payment" last>
           <div>
             <label htmlFor="paymentProof" className="label">
               Proof of payment

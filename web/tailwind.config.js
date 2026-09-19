@@ -4,16 +4,19 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Three inks on black stock. No fourth hue, apart from the error signal.
+        // The four client colours carry the page.
         ink: '#0D0B12',
-        paper: '#F4F0E8',
-        gold: '#F5C542',
         purple: '#30104B',
-        grey: '#9A95A3', // 6.7:1 on ink, 5.5:1 on purple
+        gold: '#F5C542',
+        paper: '#F4F0E8',
+        // Approved support. Lavender is the glow: halftone halos, sparkles, echoes. Never behind
+        // paper or gold text. Emerald is the witchy accent, used sparingly.
+        lavender: '#A388EE',
+        emerald: '#094F39',
         signal: '#F87171', // errors only
       },
       fontFamily: {
-        // One family, two voices: condensed black for display, normal width for reading.
+        // One family, three voices: compressed for facts, expanded italic for energy, normal for reading.
         display: ['"Archivo Variable"', '"Arial Narrow"', 'sans-serif'],
         sans: ['"Archivo Variable"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
         mono: ['"IBM Plex Mono"', 'ui-monospace', 'monospace'],

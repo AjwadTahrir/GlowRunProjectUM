@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
 const LINKS = [
   { href: '#the-run', label: 'The run', index: '02' },
@@ -25,30 +25,36 @@ export function Header({ menuOpen, onMenuChange }: { menuOpen: boolean; onMenuCh
   }, [menuOpen, onMenuChange]);
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 h-14 border-b border-paper/15 bg-ink">
+    <header className="fixed inset-x-0 top-0 z-50 h-14 bg-ink">
       <div className="shell flex h-full items-center justify-between gap-6">
-        <a href="#top" className="display text-xl leading-none text-paper">
-          Witches Glow Run
+        <a href="#top" className="flex items-baseline gap-[0.3em] text-[1.35rem] leading-none text-paper">
+          <span className="display">Witches</span>
+          <span className="wide text-gold">Glow</span>
+          <span className="display">Run</span>
         </a>
 
-        <nav aria-label="Sections" className="hidden items-center gap-7 lg:flex">
+        <nav aria-label="Sections" className="hidden items-center gap-7 xl:flex">
           {LINKS.slice(0, -1).map((link) => (
-            <a key={link.href} href={link.href} className="tech transition-colors hover:text-paper">
+            <a
+              key={link.href}
+              href={link.href}
+              className="font-mono text-xs font-medium uppercase tracking-[0.12em] text-paper/85 transition-colors hover:text-gold"
+            >
               {link.label}
             </a>
           ))}
         </nav>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
           <a
             href="#register"
-            className="hidden border border-gold px-4 py-2 font-mono text-xs font-medium uppercase tracking-[0.14em] text-gold transition-colors hover:bg-gold hover:text-ink sm:inline-block"
+            className="wide hidden bg-gold px-4 py-2 text-sm text-ink transition-colors hover:bg-paper sm:inline-block"
           >
             Register
           </a>
           <button
             type="button"
-            className="font-mono text-xs font-medium uppercase tracking-[0.14em] text-paper lg:hidden"
+            className="font-mono text-xs font-medium uppercase tracking-[0.12em] text-paper xl:hidden"
             aria-expanded={menuOpen}
             aria-controls="mobile-menu"
             onClick={() => onMenuChange(!menuOpen)}
@@ -62,18 +68,23 @@ export function Header({ menuOpen, onMenuChange }: { menuOpen: boolean; onMenuCh
         <nav
           id="mobile-menu"
           aria-label="Sections"
-          className="fixed inset-x-0 bottom-0 top-14 overflow-y-auto bg-ink lg:hidden"
+          className="fixed inset-x-0 bottom-0 top-14 overflow-y-auto bg-purple xl:hidden"
         >
-          <ul className="shell py-6">
-            {LINKS.map((link) => (
+          <ul className="shell relative py-8">
+            {LINKS.map((link, i) => (
               <li key={link.href}>
                 <a
                   href={link.href}
                   onClick={() => onMenuChange(false)}
-                  className="flex items-baseline gap-5 py-2 text-paper"
+                  className="flex items-baseline gap-5 py-1.5 text-paper"
                 >
                   <span className="figure w-8 text-sm text-gold">{link.index}</span>
-                  <span className="display display-m">{link.label}</span>
+                  <span className={`${i % 2 === 0 ? 'display' : 'wide'} text-[clamp(2.5rem,11vw,3.75rem)] leading-none ${
+                    link.label === 'Register' ? 'text-gold' : ''
+                  }`}
+                  >
+                    {link.label}
+                  </span>
                 </a>
               </li>
             ))}

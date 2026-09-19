@@ -1,4 +1,6 @@
+import type { CSSProperties } from 'react';
 import { CATEGORY_LABELS, type Category } from '../lib/validation';
+import { Sparkle } from './Graphics';
 
 /**
  * A race bib. The same artefact appears twice: as a live preview beside the form,
@@ -6,13 +8,14 @@ import { CATEGORY_LABELS, type Category } from '../lib/validation';
  * number is the one the server assigned. Pin holes, a coloured category band and
  * a perforated tear-off strip are how a real bib is built.
  *
- * Category bands are listed in full so the stylesheet can see every class name.
+ * Category colours are the same ones used on the category tickets. They are listed
+ * in full so the stylesheet can see every class name.
  */
 const BAND: Record<Category, string> = {
-  um_student: 'bib-band-um_student',
-  um_staff: 'bib-band-um_staff',
-  um_alumni: 'bib-band-um_alumni',
-  public: 'bib-band-public',
+  um_student: 'cat-um_student',
+  um_staff: 'cat-um_staff',
+  um_alumni: 'cat-um_alumni',
+  public: 'cat-public',
 };
 
 export function Bib({
@@ -22,6 +25,7 @@ export function Bib({
   size,
   label,
   className = '',
+  style,
 }: {
   /** Server-assigned registration number, for example WGR-0001. Omit before registration. */
   number?: string;
@@ -31,6 +35,7 @@ export function Bib({
   /** Accessible name. The live preview is decorative and passes none. */
   label?: string;
   className?: string;
+  style?: CSSProperties;
 }) {
   const digits = number?.match(/^WGR-(\d+)$/)?.[1] ?? number;
   const cleanName = name?.trim();
@@ -38,6 +43,7 @@ export function Bib({
   return (
     <figure
       className={`bib ${className}`}
+      style={style}
       role={label ? 'img' : undefined}
       aria-label={label}
       aria-hidden={label ? undefined : true}
@@ -67,7 +73,7 @@ export function Bib({
         {cleanName ? (
           <div className="display bib-name">{cleanName}</div>
         ) : (
-          <div className="bib-line mt-bib" />
+          <div className="bib-line bib-mt" />
         )}
       </div>
 
@@ -79,6 +85,17 @@ export function Bib({
         )}
         <span className="bib-place">{size ? `Shirt ${size}` : ''}</span>
       </div>
+
+      {/* Feedback: choosing a category makes the bib sparkle, once. */}
+      {category && (
+        <Sparkle
+          key={category}
+          size="11cqw"
+          color="var(--gold)"
+          className="pop absolute"
+          style={{ right: '-3cqw', top: '-4cqw' }}
+        />
+      )}
     </figure>
   );
 }

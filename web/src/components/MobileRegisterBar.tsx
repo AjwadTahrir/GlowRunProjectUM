@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { FinishFlag } from './Graphics';
 
 /**
  * On a phone the Register button on the cover scrolls away long before anyone has
@@ -29,9 +30,10 @@ export function MobileRegisterBar({ hidden }: { hidden: boolean }) {
   return (
     <a
       href="#register"
-      className="fixed inset-x-0 bottom-0 z-40 flex h-14 items-center justify-center bg-gold font-mono text-sm font-medium uppercase tracking-[0.14em] text-ink md:hidden"
+      className="wide fixed inset-x-0 bottom-0 z-40 flex h-14 items-center justify-center gap-3 bg-gold text-base text-ink md:hidden"
     >
       Register
+      <FinishFlag size={18} className="border border-ink" />
     </a>
   );
 }

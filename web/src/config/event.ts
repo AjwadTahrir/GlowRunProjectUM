@@ -22,7 +22,7 @@ export const eventConfig = {
   date: todo('PLACEHOLDER: event date'),
   time: todo('PLACEHOLDER: flag-off time'),
   venue: todo('PLACEHOLDER: venue and meeting point'),
-  distance: todo('PLACEHOLDER: run distance'),
+  distance: confirmed('5 KM'),
   organiser: todo('PLACEHOLDER: organising body'),
   contactNumber: todo('PLACEHOLDER: organiser contact number'),
 

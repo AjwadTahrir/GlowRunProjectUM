@@ -74,6 +74,30 @@ describe('page content with nothing confirmed yet', () => {
   });
 });
 
+describe('the poster', () => {
+  it('says what the event is, at a glance', async () => {
+    render(<App />);
+    await screen.findByText('312 of 500 places taken');
+    expect(screen.getByRole('heading', { level: 1, name: 'Witches Glow Run' })).toBeInTheDocument();
+    // The three things the cover must communicate: distance, format, place.
+    expect(screen.getAllByText('5 KM').length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/night run/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/universiti malaya/i).length).toBeGreaterThan(0);
+    // One clear way in.
+    expect(screen.getAllByRole('link', { name: /^register$/i }).length).toBeGreaterThan(0);
+  });
+
+  it('colour-codes the four categories, the same on the ticket and the bib', async () => {
+    render(<App />);
+    await screen.findByText('312 of 500 places taken');
+    const tickets = document.querySelectorAll('#categories li > div > div');
+    const classes = Array.from(tickets).map((node) => node.className);
+    for (const id of ['um_student', 'um_staff', 'um_alumni', 'public']) {
+      expect(classes.some((name) => String(name).includes(`cat-${id}`)), id).toBe(true);
+    }
+  });
+});
+
 describe('registration, end to end', () => {
   it('fills the live bib as the participant types, then issues the server number', async () => {
     const user = userEvent.setup();

@@ -1,49 +1,61 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import type { Unconfirmed } from '../config/event';
 
-/** Section ground. Sections alternate between the two plates, ink and purple. */
+/**
+ * Section ground. Sections alternate between the two plates, ink and purple.
+ * Purple plates are cut on a slant so the page reads like sheets laid over each
+ * other, not stacked boxes. `--ground` tells ticket notches what to cut through to.
+ */
 export function SectionShell({
   id,
   tone = 'ink',
+  cut,
   className = '',
   children,
 }: {
   id: string;
   tone?: 'ink' | 'purple';
+  cut?: 'a' | 'b';
   className?: string;
   children: ReactNode;
 }) {
+  const shape = cut === 'a' ? 'cut-a' : cut === 'b' ? 'cut-b' : '';
   return (
     <section
       id={id}
       aria-labelledby={`${id}-heading`}
-      className={`${tone === 'purple' ? 'bg-purple' : ''} ${className}`}
+      className={`relative ${tone === 'purple' ? 'bg-purple' : ''} ${shape} ${className}`}
+      style={{ ['--ground' as string]: tone === 'purple' ? 'var(--purple)' : 'var(--ink)' } as CSSProperties}
     >
       {children}
     </section>
   );
 }
 
-const SIZE = { l: 'display-l', m: 'display-h', r: 'display-r' } as const;
-
-/** Section heading in the display voice. The folio is a small inline index. */
+/**
+ * Section heading. The caller sets the voice (compressed, expanded italic, outline)
+ * and the size, so no two headings are cut from the same template. The folio is the
+ * section's stop number on the route.
+ */
 export function Title({
   id,
   index,
-  size = 'l',
   className = '',
+  style,
+  folioClass = '',
   children,
 }: {
   id: string;
   index: string;
-  size?: keyof typeof SIZE;
   className?: string;
+  style?: CSSProperties;
+  folioClass?: string;
   children: ReactNode;
 }) {
   return (
-    <h2 id={`${id}-heading`} className={`display ${SIZE[size]} ${className}`}>
+    <h2 id={`${id}-heading`} className={className} style={style}>
       {children}
-      <span aria-hidden className="folio">
+      <span aria-hidden className={`folio ${folioClass}`}>
         {index}
       </span>
     </h2>
@@ -68,11 +80,11 @@ export function Value({ field, w }: { field: Unconfirmed<string>; w?: string }) 
   return field.confirmed ? <>{field.value}</> : <Blank w={w} />;
 }
 
-/** A programme row: label, dotted leader, value. */
+/** A programme row: label, dotted leader, value. Takes its colour from where it is printed. */
 export function Leader({ label, field, w }: { label: string; field: Unconfirmed<string>; w?: string }) {
   return (
     <div className="leader py-3">
-      <dt className="tech shrink-0">{label}</dt>
+      <dt className="tech-on shrink-0">{label}</dt>
       <dd className="display display-s text-right">
         <Value field={field} w={w} />
       </dd>
@@ -82,19 +94,17 @@ export function Leader({ label, field, w }: { label: string; field: Unconfirmed<
 
 /**
  * Artwork opens full size. The poster is the work; the frame stays out of its way.
- * `crop` sets a fixed aspect ratio so the image can be cropped hard into a layout.
+ * It is shown taped to the page: tilt and tape come from the section that uses it.
  */
 export function Artwork({
   src,
   alt,
   caption,
-  crop,
   className = '',
 }: {
   src: string;
   alt: string;
   caption?: string;
-  crop?: string;
   className?: string;
 }) {
   const [open, setOpen] = useState(false);
@@ -111,12 +121,7 @@ export function Artwork({
   return (
     <figure className={className}>
       <button type="button" onClick={() => setOpen(true)} className="block w-full" aria-label={`${alt}, open full size`}>
-        <img
-          src={src}
-          alt={alt}
-          loading="lazy"
-          className={crop ? `w-full object-cover object-top ${crop}` : 'h-auto w-full'}
-        />
+        <img src={src} alt={alt} loading="lazy" className="h-auto w-full border-4 border-paper" />
       </button>
       {caption && <figcaption className="tech mt-3">{caption}</figcaption>}
 
