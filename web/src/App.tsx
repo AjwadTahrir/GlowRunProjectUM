@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Header } from './components/Header';
 import { Cover } from './components/Cover';
+import { DebugOverlay } from './components/DebugOverlay';
 import { MobileRegisterBar } from './components/MobileRegisterBar';
 import { Categories, Community, Entitlements, Footer, LuckyDraw, Route, TheNight, TheRun } from './components/Sections';
 import { RegistrationSection } from './components/Registration';
@@ -22,6 +23,9 @@ export function App() {
       cancelled = true;
     };
   }, [registration]);
+
+  // Diagnostics for real-device layout questions. Only when the URL has ?debug.
+  const debug = typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('debug');
 
   const registrationOpen = Boolean(status && status.registration.open && !status.registration.isFull);
 
@@ -55,6 +59,7 @@ export function App() {
 
       <Footer />
       <MobileRegisterBar hidden={menuOpen || Boolean(registration) || !registrationOpen} />
+      {debug && <DebugOverlay />}
     </>
   );
 }
