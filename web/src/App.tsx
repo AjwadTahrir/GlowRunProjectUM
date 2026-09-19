@@ -1,16 +1,16 @@
 import { useEffect, useState } from 'react';
 import { Header } from './components/Header';
 import { Cover } from './components/Cover';
+import { MobileRegisterBar } from './components/MobileRegisterBar';
 import { Categories, Community, Entitlements, Footer, LuckyDraw, Route, TheNight, TheRun } from './components/Sections';
-import { RegistrationForm } from './components/RegistrationForm';
-import { Confirmation } from './components/Confirmation';
-import { Section } from './components/ui';
+import { RegistrationSection } from './components/Registration';
 import { fetchEventStatus, type EventStatus, type RegistrationResult } from './lib/api';
 
 export function App() {
   const [status, setStatus] = useState<EventStatus | null>(null);
   const [loadFailed, setLoadFailed] = useState(false);
   const [registration, setRegistration] = useState<RegistrationResult | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   // Availability comes from the server on load, and again after every acceptance.
   useEffect(() => {
@@ -23,6 +23,8 @@ export function App() {
     };
   }, [registration]);
 
+  const registrationOpen = Boolean(status && status.registration.open && !status.registration.isFull);
+
   return (
     <>
       <a
@@ -32,7 +34,7 @@ export function App() {
         Skip to registration
       </a>
 
-      <Header />
+      <Header menuOpen={menuOpen} onMenuChange={setMenuOpen} />
 
       <main>
         <Cover status={status} />
@@ -42,32 +44,17 @@ export function App() {
         <Entitlements />
         <TheNight />
         <LuckyDraw />
-
-        <Section id="register" index="08" title={registration ? 'Registered' : 'Registration'}>
-          {registration ? (
-            <Confirmation registration={registration} />
-          ) : loadFailed ? (
-            <p className="border-l-2 border-red-400 py-2 pl-4 font-mono text-sm text-red-300" role="alert">
-              Registration availability could not be loaded. Reload the page — registrations are not being
-              accepted until the number of remaining places can be confirmed.
-            </p>
-          ) : (
-            <>
-              {status && !status.registration.isFull && status.registration.open && (
-                <p className="mb-12 font-mono text-sm uppercase tracking-[0.18em] text-gold">
-                  {status.registration.maxCapacity - status.registration.placesRemaining} /{' '}
-                  {status.registration.maxCapacity} participants
-                </p>
-              )}
-              <RegistrationForm status={status} onRegistered={setRegistration} />
-            </>
-          )}
-        </Section>
-
+        <RegistrationSection
+          status={status}
+          loadFailed={loadFailed}
+          registration={registration}
+          onRegistered={setRegistration}
+        />
         <Community registered={Boolean(registration)} />
       </main>
 
       <Footer />
+      <MobileRegisterBar hidden={menuOpen || Boolean(registration) || !registrationOpen} />
     </>
   );
 }

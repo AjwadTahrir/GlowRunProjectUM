@@ -1,69 +1,102 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import type { Unconfirmed } from '../config/event';
 
-/**
- * Sections are numbered because the page is a sequence — a publication read
- * top to bottom — not because numbering looks technical.
- */
-export function Section({
+/** Section ground. Sections alternate between the two plates, ink and purple. */
+export function SectionShell({
   id,
-  index,
-  title,
-  children,
+  tone = 'ink',
   className = '',
+  children,
 }: {
   id: string;
-  index: string;
-  title: string;
-  children: ReactNode;
+  tone?: 'ink' | 'purple';
   className?: string;
+  children: ReactNode;
 }) {
   return (
-    <section id={id} aria-labelledby={`${id}-heading`} className={`py-20 sm:py-28 ${className}`}>
-      <div className="shell">
-        <div className="marker">
-          <span className="tech-gold">{index}</span>
-          <h2 id={`${id}-heading`} className="tech">
-            {title}
-          </h2>
-        </div>
-        <div className="mt-10 sm:mt-14">{children}</div>
-      </div>
+    <section
+      id={id}
+      aria-labelledby={`${id}-heading`}
+      className={`${tone === 'purple' ? 'bg-purple' : ''} ${className}`}
+    >
+      {children}
     </section>
   );
 }
 
-/** Renders a confirmed value, or an unmistakable flag when the organiser hasn't supplied one. */
-export function Value({ field }: { field: Unconfirmed<string> }) {
-  return field.confirmed ? <>{field.value}</> : <span className="flag">Not confirmed</span>;
+const SIZE = { l: 'display-l', m: 'display-h', r: 'display-r' } as const;
+
+/** Section heading in the display voice. The folio is a small inline index. */
+export function Title({
+  id,
+  index,
+  size = 'l',
+  className = '',
+  children,
+}: {
+  id: string;
+  index: string;
+  size?: keyof typeof SIZE;
+  className?: string;
+  children: ReactNode;
+}) {
+  return (
+    <h2 id={`${id}-heading`} className={`display ${SIZE[size]} ${className}`}>
+      {children}
+      <span aria-hidden className="folio">
+        {index}
+      </span>
+    </h2>
+  );
 }
 
-/** A labelled data point. Label in mono above, value in display below. */
-export function DataPoint({ label, field }: { label: string; field: Unconfirmed<string> }) {
+/**
+ * The empty line on a printed form. Stands in for anything the organiser has not
+ * confirmed. Sighted readers see a blank to be filled in; screen readers are told.
+ */
+export function Blank({ w = '9ch' }: { w?: string }) {
   return (
-    <div className="border-t border-[color:var(--rule)] pt-3">
-      <div className="tech">{label}</div>
-      <div className="mt-1.5 font-display text-2xl leading-tight sm:text-3xl">
-        <Value field={field} />
-      </div>
+    <>
+      <span className="blank" style={{ ['--w' as string]: w }} aria-hidden />
+      <span className="sr-only">To be announced</span>
+    </>
+  );
+}
+
+/** A confirmed value, or a blank line. Never a placeholder passed off as fact. */
+export function Value({ field, w }: { field: Unconfirmed<string>; w?: string }) {
+  return field.confirmed ? <>{field.value}</> : <Blank w={w} />;
+}
+
+/** A programme row: label, dotted leader, value. */
+export function Leader({ label, field, w }: { label: string; field: Unconfirmed<string>; w?: string }) {
+  return (
+    <div className="leader py-3">
+      <dt className="tech shrink-0">{label}</dt>
+      <dd className="display display-s text-right">
+        <Value field={field} w={w} />
+      </dd>
     </div>
   );
 }
 
-export function MissingAsset({ what }: { what: string }) {
-  return (
-    <div className="flex min-h-[14rem] flex-col items-start justify-center border border-dashed border-[color:var(--rule)] p-8">
-      <span className="flag">Awaiting artwork</span>
-      <p className="mt-3 max-w-md font-mono text-xs leading-relaxed text-grey">
-        The {what} has not been supplied. Add the file to web/public/ and reference it in
-        eventConfig.posters.
-      </p>
-    </div>
-  );
-}
-
-/** Artwork opens full size. The poster is the work; the frame stays out of its way. */
-export function Artwork({ src, alt, caption }: { src: string; alt: string; caption?: string }) {
+/**
+ * Artwork opens full size. The poster is the work; the frame stays out of its way.
+ * `crop` sets a fixed aspect ratio so the image can be cropped hard into a layout.
+ */
+export function Artwork({
+  src,
+  alt,
+  caption,
+  crop,
+  className = '',
+}: {
+  src: string;
+  alt: string;
+  caption?: string;
+  crop?: string;
+  className?: string;
+}) {
   const [open, setOpen] = useState(false);
   const closeRef = useRef<HTMLButtonElement>(null);
 
@@ -76,33 +109,33 @@ export function Artwork({ src, alt, caption }: { src: string; alt: string; capti
   }, [open]);
 
   return (
-    <figure>
-      <button type="button" onClick={() => setOpen(true)} className="block w-full" aria-label={`${alt} — open full size`}>
-        <img src={src} alt={alt} loading="lazy" className="h-auto w-full" />
+    <figure className={className}>
+      <button type="button" onClick={() => setOpen(true)} className="block w-full" aria-label={`${alt}, open full size`}>
+        <img
+          src={src}
+          alt={alt}
+          loading="lazy"
+          className={crop ? `w-full object-cover object-top ${crop}` : 'h-auto w-full'}
+        />
       </button>
-      {caption && (
-        <figcaption className="tech mt-3 flex items-center gap-3">
-          <span className="h-px w-8 bg-[color:var(--rule)]" aria-hidden />
-          {caption}
-        </figcaption>
-      )}
+      {caption && <figcaption className="tech mt-3">{caption}</figcaption>}
 
       {open && (
         <div
           role="dialog"
           aria-modal="true"
           aria-label={alt}
-          className="fixed inset-0 z-[110] flex items-center justify-center bg-ink/97 p-4"
+          className="fixed inset-0 z-[110] flex items-center justify-center bg-ink/95 p-4"
           onClick={() => setOpen(false)}
         >
           <button
             ref={closeRef}
             type="button"
             onClick={() => setOpen(false)}
-            className="tech-gold absolute right-6 top-6"
+            className="btn-outline absolute right-4 top-4"
             aria-label="Close"
           >
-            Close ✕
+            Close
           </button>
           <img src={src} alt={alt} className="max-h-full max-w-full" />
         </div>

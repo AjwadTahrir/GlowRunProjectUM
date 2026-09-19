@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 /**
- * Mirror of server/src/lib/validation.ts. The server copy is authoritative — this one
+ * Mirror of server/src/lib/validation.ts. The server copy is authoritative, and this one
  * exists so the participant gets feedback before submitting. Keep them in step.
  */
 

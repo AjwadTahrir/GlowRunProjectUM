@@ -1,8 +1,9 @@
 # Pre-launch checklist
 
 Nothing below is invented. Every line is information only the organiser can supply.
-The site renders a visible "Not confirmed" flag wherever one of these is still missing,
-so you can walk the page and spot them.
+Anything still missing appears on the page as a blank printed line, and screen readers
+hear "To be announced". Blanks are quiet by design, so they are easy to miss: run
+`npm run dev` and the browser console lists every unconfirmed field by name.
 
 ## Blocking — registration must not open until these are done
 
@@ -22,7 +23,7 @@ so you can walk the page and spot them.
 
 ## Assets to drop into `web/public/` and reference in `eventConfig.posters`
 
-- [ ] Route map or route poster (`posters.route`) plus start point, finish point and route notes.
+- [ ] Route map or route poster (`posters.route`) plus start point, finish point and route notes. Named stops along the course (checkpoints, water) go in `route.points`; none are shown until supplied.
 - [ ] Event tentative poster (`posters.tentative`) and/or the schedule rows in `eventConfig.schedule`.
 - [ ] Entitlements poster (`posters.entitlements`) and/or the list in `eventConfig.entitlements`,
       with inclusions and exclusions stated.

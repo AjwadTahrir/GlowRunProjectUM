@@ -3,176 +3,383 @@
 @tailwind utilities;
 
 /*
-  Witches Glow Run — visual system.
+  Witches Glow Run: night stock.
 
-  The page is one race poster, printed in three inks on black stock:
-  paper (off-white), gold, purple. No gradients, no glow, no blur.
-  Structure carries the design; colour is used sparingly and flat.
+  The page is printed in three inks on black stock: paper, gold, purple.
+  Every print detail has a job. Crop marks frame the cover. A halftone dot field
+  is the moon. A perforation is where the lucky-draw ticket tears. Blank rules
+  are the fields the organiser has not filled in yet, as on a printed form.
+  No gradients, glows, blurs or shadows.
 */
 
 @layer base {
   :root {
     color-scheme: dark;
-    --rule: rgba(244, 240, 232, 0.18);
+    --ink: #0d0b12;
+    --purple: #30104b;
+    --gold: #f5c542;
+    --paper: #f4f0e8;
+    --rule: rgba(244, 240, 232, 0.22);
+    --blank: rgba(244, 240, 232, 0.42);
   }
 
   html {
     scroll-behavior: smooth;
     scroll-padding-top: 4rem;
+    background: var(--ink);
   }
 
   body {
-    @apply bg-ink text-paper font-sans antialiased;
+    @apply bg-ink font-sans text-paper antialiased;
   }
 
-  /* Print grain. One fixed overlay rather than a texture on every surface. */
+  /* Print grain: one fixed overlay, never a texture on scrolling surfaces. */
   body::after {
     content: '';
     position: fixed;
     inset: 0;
     z-index: 100;
     pointer-events: none;
-    opacity: 0.055;
+    opacity: 0.05;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
   }
 
-  h1, h2, h3 {
-    @apply font-display font-normal;
-  }
-
-  /* Gold on black is the only pairing with enough contrast to carry focus. */
   :focus-visible {
-    outline: 2px solid #f5c542;
+    outline: 2px solid var(--gold);
     outline-offset: 3px;
   }
 
   ::selection {
-    background: #f5c542;
-    color: #0d0b12;
+    background: var(--gold);
+    color: var(--ink);
   }
 }
 
 @layer components {
   .shell {
-    @apply mx-auto w-full max-w-[84rem] px-5 sm:px-8;
+    @apply mx-auto w-full max-w-[88rem] px-5 sm:px-8 lg:px-12;
   }
 
-  /* Technical data: times, distances, fees, IDs, field labels. */
+  /* ---- Type ----------------------------------------------------------- */
+
+  /* The display voice: Archivo at its narrowest width, black weight. */
+  .display {
+    font-family: 'Archivo Variable', 'Arial Narrow', sans-serif;
+    font-stretch: 62%;
+    font-weight: 850;
+    text-transform: uppercase;
+    letter-spacing: 0.005em;
+    line-height: 0.88;
+  }
+
+  .display-l { font-size: clamp(3.75rem, 13vw, 12rem); }
+  .display-m { font-size: clamp(3rem, 8vw, 6.5rem); }
+  /* Section headings that share a row with other content. */
+  .display-h { font-size: clamp(2.75rem, 5.4vw, 5.5rem); }
+  .display-r { font-size: clamp(3.5rem, 10.5vw, 9.5rem); }
+  .display-s { font-size: clamp(1.6rem, 3.2vw, 2.6rem); line-height: 0.98; }
+
+  /* Section index. Small and inline: a folio, not an eyebrow. */
+  .folio {
+    display: inline-block;
+    margin-left: 0.7rem;
+    transform: translateY(0.35rem);
+    vertical-align: top;
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 0.8rem;
+    font-weight: 500;
+    font-stretch: 100%;
+    letter-spacing: 0.12em;
+    line-height: 1;
+    color: var(--gold);
+  }
+
+  /* Times, distances, fees, registration numbers. */
+  .figure {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Small technical label. Kept for data captions only. */
   .tech {
-    @apply font-mono text-[0.7rem] uppercase tracking-[0.18em] text-grey;
+    @apply font-mono text-xs uppercase tracking-[0.14em] text-grey;
   }
 
-  .tech-gold {
-    @apply font-mono text-[0.7rem] uppercase tracking-[0.18em] text-gold;
+  /* Sentence-case label for anything a person has to read or fill in. */
+  .label {
+    @apply block text-sm font-medium text-paper/90;
   }
 
-  /* Section marker: a number and a name on a rule. Sequence, not decoration. */
-  .marker {
-    @apply flex items-baseline gap-4 border-t border-[color:var(--rule)] pt-4;
+  .hint {
+    @apply mt-2 text-sm leading-snug text-grey;
   }
 
-  .display-xl {
-    @apply font-display leading-[0.84] tracking-tightest;
-    font-size: clamp(3.5rem, 15vw, 13rem);
+  .lede {
+    @apply max-w-[46ch] text-lg leading-relaxed text-paper/75;
   }
 
-  .display-lg {
-    @apply font-display leading-[0.9] tracking-tightest;
-    font-size: clamp(2.5rem, 7vw, 5.5rem);
+  /* ---- Cover ---------------------------------------------------------- */
+
+  .wordmark {
+    font-size: min(27vw, 20.5dvh);
+    line-height: 0.82;
+    width: fit-content;
+  }
+  @media (min-width: 768px) {
+    .wordmark { font-size: min(17vw, 21.5dvh); }
   }
 
-  /* The one graphic liberty on the page: GLOW is set hollow. */
-  .outlined {
-    color: transparent;
-    -webkit-text-stroke: 1.5px #f5c542;
-    paint-order: stroke fill;
+  /* Gold ink printed a hair off register over the purple plate. */
+  .glow-word {
+    color: var(--gold);
+    text-shadow: 0.035em 0.035em 0 var(--purple);
   }
 
-  @supports not (-webkit-text-stroke: 1px black) {
-    .outlined { color: #f5c542; }
+  /*
+    The moon, as a halftone print: five dot sizes stepping down away from the lit
+    spot, each in its own ring. Plain CSS, no image.
+  */
+  .moon {
+    position: absolute;
+    z-index: -1;
+    width: min(92vw, 100dvh);
+    aspect-ratio: 1;
+    right: -32vw;
+    top: 9dvh;
+    border-radius: 9999px;
+    background: var(--purple);
+    overflow: hidden;
+  }
+  @media (min-width: 768px) {
+    .moon { width: min(70vw, 108dvh); right: -13vw; top: 8dvh; }
+  }
+  .moon i {
+    position: absolute;
+    inset: 0;
+    --light: circle farthest-side at 64% 31%;
+    background-size: 12px 12px;
+  }
+  .moon i:nth-child(1) {
+    background-image: radial-gradient(circle, var(--gold) 0 5.6px, transparent 6px);
+    mask-image: radial-gradient(var(--light), #000 0 12%, transparent 12.3%);
+    -webkit-mask-image: radial-gradient(var(--light), #000 0 12%, transparent 12.3%);
+  }
+  .moon i:nth-child(2) {
+    background-image: radial-gradient(circle, var(--gold) 0 4.3px, transparent 4.7px);
+    background-position: 6px 6px;
+    mask-image: radial-gradient(var(--light), transparent 0 12%, #000 12.3% 24%, transparent 24.3%);
+    -webkit-mask-image: radial-gradient(var(--light), transparent 0 12%, #000 12.3% 24%, transparent 24.3%);
+  }
+  .moon i:nth-child(3) {
+    background-image: radial-gradient(circle, var(--gold) 0 3px, transparent 3.4px);
+    mask-image: radial-gradient(var(--light), transparent 0 24%, #000 24.3% 36%, transparent 36.3%);
+    -webkit-mask-image: radial-gradient(var(--light), transparent 0 24%, #000 24.3% 36%, transparent 36.3%);
+  }
+  .moon i:nth-child(4) {
+    background-image: radial-gradient(circle, var(--gold) 0 2px, transparent 2.4px);
+    background-position: 6px 6px;
+    mask-image: radial-gradient(var(--light), transparent 0 36%, #000 36.3% 48%, transparent 48.3%);
+    -webkit-mask-image: radial-gradient(var(--light), transparent 0 36%, #000 36.3% 48%, transparent 48.3%);
+  }
+  .moon i:nth-child(5) {
+    background-image: radial-gradient(circle, var(--gold) 0 1.1px, transparent 1.5px);
+    mask-image: radial-gradient(var(--light), transparent 0 48%, #000 48.3% 60%, transparent 60.3%);
+    -webkit-mask-image: radial-gradient(var(--light), transparent 0 48%, #000 48.3% 60%, transparent 60.3%);
   }
 
-  /* Corner crop marks, as on a press sheet. */
+  /* Crop marks: the cover is a press sheet, and only the cover. */
   .cropmarks::before,
   .cropmarks::after {
     content: '';
     position: absolute;
-    width: 14px;
-    height: 14px;
-    border-color: rgba(244, 240, 232, 0.35);
+    width: 22px;
+    height: 22px;
+    border-color: rgba(244, 240, 232, 0.5);
+    pointer-events: none;
   }
   .cropmarks::before {
-    top: 1.25rem; left: 1.25rem;
+    top: 4.25rem; left: 1rem;
     border-top: 1px solid; border-left: 1px solid;
   }
   .cropmarks::after {
-    bottom: 1.25rem; right: 1.25rem;
+    bottom: 1rem; right: 1rem;
     border-bottom: 1px solid; border-right: 1px solid;
   }
 
+  /* ---- Blank fields --------------------------------------------------- */
+
+  /* What an unconfirmed value looks like: the empty line on a printed form. */
+  .blank {
+    display: inline-block;
+    width: var(--w, 9ch);
+    max-width: 100%;
+    height: 0.8em;
+    vertical-align: baseline;
+    border-bottom: 2px solid var(--blank);
+  }
+  .on-gold .blank { border-bottom-color: rgba(13, 11, 18, 0.5); }
+
+  /* A row of a printed programme: label, leader, value. */
+  .leader {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+  }
+  .leader::after {
+    content: '';
+    order: 1;
+    flex: 1 1 1rem;
+    min-width: 1rem;
+    border-bottom: 2px dotted var(--rule);
+    transform: translateY(-0.2em);
+  }
+  .leader > :last-child { order: 2; }
+
+  /* ---- Controls ------------------------------------------------------- */
+
   .btn-gold {
-    @apply inline-flex items-center justify-center bg-gold px-8 py-4 font-mono text-xs
-           uppercase tracking-[0.18em] text-ink transition-colors
-           hover:bg-paper disabled:cursor-not-allowed disabled:opacity-40;
+    @apply inline-flex items-center justify-center bg-gold px-8 py-4 font-mono text-sm font-medium
+           uppercase tracking-[0.14em] text-ink transition-colors
+           hover:bg-paper active:translate-y-px disabled:cursor-not-allowed disabled:opacity-40;
     min-height: 52px;
   }
 
   .btn-outline {
-    @apply inline-flex items-center justify-center border border-[color:var(--rule)] px-8 py-4
-           font-mono text-xs uppercase tracking-[0.18em] text-paper transition-colors
-           hover:border-gold hover:text-gold;
+    @apply inline-flex items-center justify-center border border-paper/40 px-8 py-4
+           font-mono text-sm font-medium uppercase tracking-[0.14em] text-paper transition-colors
+           hover:border-gold hover:text-gold active:translate-y-px;
     min-height: 52px;
   }
 
-  /* Form fields are ruled lines, not boxes. Closer to a paper entry form. */
+  /* Form fields are ruled lines, as on a paper entry form. */
   .field {
-    @apply w-full border-0 border-b border-[color:var(--rule)] bg-transparent px-0 py-3
+    @apply w-full border-0 border-b-2 border-paper/35 bg-transparent px-0 py-3
            font-sans text-lg text-paper transition-colors
            placeholder:text-grey focus:border-gold focus:outline-none focus:ring-0;
     min-height: 48px;
     border-radius: 0;
   }
-
-  .field[aria-invalid='true'] {
-    @apply border-red-400;
-  }
+  .field[aria-invalid='true'] { @apply border-signal; }
 
   select.field {
-    /* Native arrow is invisible on black in several browsers. */
     appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none' stroke='%2377727D' stroke-width='1.5'%3E%3Cpath d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none' stroke='%23F4F0E8' stroke-width='1.5'%3E%3Cpath d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 0.25rem center;
   }
+  select.field option { background: var(--ink); color: var(--paper); }
 
   .field-error {
-    @apply mt-2 font-mono text-xs uppercase tracking-[0.12em] text-red-400;
+    @apply mt-2 text-sm font-medium text-signal;
   }
 
-  .flag {
-    @apply inline-block border border-dashed border-gold/60 px-2 py-0.5 font-mono
-           text-[0.65rem] uppercase tracking-[0.14em] text-gold;
+  /* ---- Race bib ------------------------------------------------------- */
+
+  .bib {
+    container-type: inline-size;
+    position: relative;
+    aspect-ratio: 7 / 5;
+    background: var(--paper);
+    color: var(--ink);
+    display: grid;
+    grid-template-rows: auto 1fr auto auto;
+    padding: 5cqw 5cqw 0;
+  }
+  .bib-hole {
+    position: absolute;
+    width: 3.4cqw;
+    height: 3.4cqw;
+    border-radius: 9999px;
+    background: var(--bib-ground, var(--purple));
+  }
+  .bib-hole-tl { left: 3cqw; top: 3cqw; }
+  .bib-hole-tr { right: 3cqw; top: 3cqw; }
+  .bib-hole-bl { left: 3cqw; bottom: 15cqw; }
+  .bib-hole-br { right: 3cqw; bottom: 15cqw; }
+  .mt-bib { margin-top: 6cqw; }
+  .bib-head { display: flex; align-items: baseline; justify-content: space-between; }
+  .bib-brand { font-size: 7.4cqw; }
+  .bib-place {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 2.9cqw;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+  }
+  .bib-center { display: flex; align-items: center; justify-content: center; }
+  .bib-number { font-size: 34cqw; line-height: 0.8; }
+  .bib-blankwrap { display: flex; width: 100%; flex-direction: column; align-items: center; gap: 2.4cqw; }
+  .bib-line { display: block; border-bottom: 0.8cqw solid rgba(13, 11, 18, 0.35); }
+  .bib-note {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 2.9cqw;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: rgba(13, 11, 18, 0.65);
+  }
+  .bib-namebox { min-height: 10cqw; }
+  .bib-name {
+    font-size: 9cqw;
+    line-height: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .bib-tear {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 3cqw;
+    margin: 3.5cqw -5cqw 0;
+    padding: 2.4cqw 5cqw;
+    border-top: 2px dashed rgba(13, 11, 18, 0.45);
+  }
+  .bib-cat { padding: 0.8cqw 2.4cqw; font-size: 5.4cqw; line-height: 1; }
+  .bib-band-um_student { background: var(--gold); color: var(--ink); }
+  .bib-band-um_staff { background: var(--purple); color: var(--paper); }
+  .bib-band-um_alumni { background: var(--ink); color: var(--paper); }
+  .bib-band-public { border: 3px solid var(--ink); color: var(--ink); }
+
+  /* ---- Ticket --------------------------------------------------------- */
+
+  .notch {
+    position: absolute;
+    width: 28px;
+    height: 28px;
+    border-radius: 9999px;
+    background: var(--ink);
+  }
+
+  /* ---- Course line ---------------------------------------------------- */
+
+  .course-line {
+    transform-origin: left center;
+    transition: transform 1400ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .course-line--pending { transform: scaleX(0); }
+
+  .finish-flag {
+    background: conic-gradient(var(--ink) 25%, var(--paper) 0 50%, var(--ink) 0 75%, var(--paper) 0) 0 0 / 50% 50%;
   }
 }
 
-/*
-  Two entrances, both on first paint, both once. Nothing animates on scroll.
-  The page is fully designed with all of this disabled.
-*/
+/* Hero entrance: sets the reading order, once, on first paint. */
 @keyframes lift {
-  from { opacity: 0; transform: translateY(0.6em); }
+  from { opacity: 0; transform: translateY(0.35em); }
   to   { opacity: 1; transform: none; }
 }
 
 .lift   { animation: lift 900ms cubic-bezier(0.16, 1, 0.3, 1) both; }
-.lift-2 { animation-delay: 110ms; }
+.lift-2 { animation-delay: 100ms; }
 .lift-3 { animation-delay: 220ms; }
-.lift-4 { animation-delay: 380ms; }
+.lift-4 { animation-delay: 340ms; }
+.lift-5 { animation-delay: 520ms; }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
     transition-duration: 0.01ms !important;
   }
+  .course-line--pending { transform: none; }
 }

@@ -1,64 +1,66 @@
 import { eventConfig } from '../config/event';
 import type { EventStatus } from '../lib/api';
+import { Blank } from './ui';
 
 /**
- * The cover. A race poster that happens to be the top of a web page: oversized
- * type, a technical data strip along the foot, crop marks at the corners.
- *
- * "GLOW" is set hollow — the one piece of graphic licence on the site, and the
- * only place the gold ink is used at display size.
+ * The cover is the poster. Wordmark on the left, a halftone moon cropped off the
+ * right edge, and the four facts a runner needs printed along the foot.
  */
 export function Cover({ status }: { status: EventStatus | null }) {
-  const cell = (label: string, field: { value: string; confirmed: boolean }) => (
-    <div key={label} className="border-t border-[color:var(--rule)] pt-3">
-      <div className="tech">{label}</div>
-      <div className="mt-1 font-mono text-sm text-paper">
-        {field.confirmed ? field.value : <span className="flag">TBC</span>}
-      </div>
+  const spec = (label: string, field: { value: string; confirmed: boolean }) => (
+    <div key={label}>
+      <dt className="tech">{label}</dt>
+      <dd className="display display-s mt-2">{field.confirmed ? field.value : <Blank w="8ch" />}</dd>
     </div>
   );
 
-  return (
-    <div id="top" className="cropmarks relative flex min-h-[100svh] flex-col justify-between overflow-hidden pb-10 pt-24">
-      <div className="shell">
-        <div className="lift flex flex-wrap items-baseline justify-between gap-x-8 gap-y-2">
-          <span className="tech-gold">Universiti Malaya · Night Run</span>
-          <span className="tech">2026</span>
-        </div>
+  const registration = status?.registration;
 
-        <h1 className="display-xl mt-8 sm:mt-12">
-          <span className="lift lift-2 block">Witches</span>
-          <span className="lift lift-3 outlined block">Glow</span>
-          <span className="lift lift-4 block">Run</span>
-        </h1>
+  return (
+    <div id="top" className="cropmarks relative isolate flex min-h-[100dvh] flex-col overflow-hidden pt-14">
+      <div className="moon" aria-hidden>
+        <i /><i /><i /><i /><i />
       </div>
 
-      <div className="shell">
-        <p className="mb-10 max-w-[38ch] font-display text-2xl italic leading-snug text-paper/80 sm:text-3xl">
-          {eventConfig.tagline.value}
-        </p>
-
-        <div className="grid grid-cols-2 gap-x-6 gap-y-6 sm:grid-cols-4">
-          {cell('Date', eventConfig.date)}
-          {cell('Flag off', eventConfig.time)}
-          {cell('Distance', eventConfig.distance)}
-          {cell('Venue', eventConfig.venue)}
+      <div className="shell flex flex-1 flex-col justify-between gap-8 pb-8 pt-8 md:gap-10 md:pb-10 md:pt-14">
+        <div>
+          <p className="lift font-mono text-xs uppercase tracking-[0.14em] text-paper">Universiti Malaya</p>
+          <p className="lift font-mono text-xs uppercase tracking-[0.14em] text-gold">Night run</p>
         </div>
 
-        <div className="mt-10 flex flex-wrap items-center gap-4">
-          <a href="#register" className="btn-gold">
-            Register
-          </a>
-          {/* Counted on the server. The browser never invents this number. */}
-          {status && (
-            <span className="font-mono text-xs uppercase tracking-[0.18em] text-grey" aria-live="polite">
-              {status.registration.isFull
-                ? `Full — ${status.registration.maxCapacity}/${status.registration.maxCapacity} participants`
-                : !status.registration.open
-                  ? 'Registration closed'
-                  : `${status.registration.maxCapacity - status.registration.placesRemaining} / ${status.registration.maxCapacity} participants`}
+        <h1 className="wordmark display">
+          <span className="lift lift-2 block">Witches</span>
+          <span className="lift lift-3 glow-word block pl-[0.55em]">Glow</span>
+          <span className="lift lift-4 block text-right">Run</span>
+        </h1>
+
+        <div className="lift lift-5">
+          <div className="grid items-end gap-x-10 gap-y-8 md:grid-cols-12">
+            <p className="max-w-[30ch] text-lg leading-snug text-paper/85 md:col-span-3">
+              A night run at Universiti Malaya. Open to students, staff, alumni and the public.
+            </p>
+            <dl className="grid grid-cols-2 gap-x-6 gap-y-6 md:col-span-9 md:grid-cols-4">
+              {spec('Date', eventConfig.date)}
+              {spec('Flag off', eventConfig.time)}
+              {spec('Distance', eventConfig.distance)}
+              {spec('Venue', eventConfig.venue)}
+            </dl>
+          </div>
+
+          <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
+            <a href="#register" className="btn-gold">
+              Register
+            </a>
+            {/* Counted on the server. The browser never invents this number. */}
+            <span className="figure min-h-[1.25rem] text-sm text-paper/80" aria-live="polite">
+              {registration &&
+                (registration.isFull
+                  ? `Full: ${registration.maxCapacity} of ${registration.maxCapacity} places taken`
+                  : !registration.open
+                    ? 'Registration closed'
+                    : `${registration.maxCapacity - registration.placesRemaining} of ${registration.maxCapacity} places taken`)}
             </span>
-          )}
+          </div>
         </div>
       </div>
     </div>
