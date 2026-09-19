@@ -91,7 +91,7 @@ export function Footer() {
         </div>
       </div>
 
-      <div aria-hidden className="mb-14 select-none overflow-hidden whitespace-nowrap px-[1.5vw] md:mb-0">
+      <div aria-hidden className="mb-[calc(3.5rem+var(--safe-bottom))] select-none overflow-hidden whitespace-nowrap px-[1.5vw] md:mb-0">
         <span className="block translate-y-[14%] text-[10.6vw] leading-[0.8]">
           <span className="display text-paper">Witches </span>
           <span className="wide text-gold">Glow </span>

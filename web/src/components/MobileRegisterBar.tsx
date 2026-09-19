@@ -30,7 +30,7 @@ export function MobileRegisterBar({ hidden }: { hidden: boolean }) {
   return (
     <a
       href="#register"
-      className="wide fixed inset-x-0 bottom-0 z-40 flex h-14 items-center justify-center gap-3 bg-gold text-base text-ink md:hidden"
+      className="wide fixed inset-x-0 bottom-0 z-40 flex h-[calc(3.5rem+var(--safe-bottom))] items-center justify-center gap-3 bg-gold pb-[var(--safe-bottom)] text-base text-ink md:hidden"
     >
       Register
       <FinishFlag size={18} className="border border-ink" />
