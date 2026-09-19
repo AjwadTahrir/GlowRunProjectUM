@@ -25,7 +25,7 @@ export function Header({ menuOpen, onMenuChange }: { menuOpen: boolean; onMenuCh
   }, [menuOpen, onMenuChange]);
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 h-14 bg-ink">
+    <header className="fixed inset-x-0 top-0 z-50 h-[var(--header-h)] bg-ink pt-[var(--safe-top)]">
       <div className="shell flex h-full items-center justify-between gap-6">
         <a href="#top" className="flex items-baseline gap-[0.3em] text-[1.35rem] leading-none text-paper">
           <span className="display">Witches</span>
@@ -68,9 +68,9 @@ export function Header({ menuOpen, onMenuChange }: { menuOpen: boolean; onMenuCh
         <nav
           id="mobile-menu"
           aria-label="Sections"
-          className="fixed inset-x-0 bottom-0 top-14 overflow-y-auto bg-purple xl:hidden"
+          className="fixed inset-x-0 bottom-0 top-[var(--header-h)] overflow-y-auto bg-purple xl:hidden"
         >
-          <ul className="shell relative py-8">
+          <ul className="shell relative pb-[calc(2rem+var(--safe-bottom))] pt-8">
             {LINKS.map((link, i) => (
               <li key={link.href}>
                 <a

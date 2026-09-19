@@ -24,11 +24,22 @@
     --emerald: #094f39;
     --ground: var(--ink); /* what a ticket notch must match */
     --cut: clamp(1.5rem, 5vw, 5rem);
+
+    /*
+      Safe areas. With viewport-fit=cover the page extends under the status bar and the
+      home indicator, so the fixed bars must own those strips. env() is read HERE, once;
+      everything else uses these variables. All are 0 on desktop and on phones without a notch.
+    */
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --header-h: calc(3.5rem + var(--safe-top));
+    /* One percent of the height of the screen you can actually use. */
+    --vh: calc((100dvh - var(--safe-top) - var(--safe-bottom)) / 100);
   }
 
   html {
     scroll-behavior: smooth;
-    scroll-padding-top: 4rem;
+    scroll-padding-top: calc(var(--header-h) + 0.5rem);
     background: var(--ink);
   }
 
@@ -61,8 +72,13 @@
 
 @layer components {
   .shell {
-    @apply mx-auto w-full max-w-[88rem] px-5 sm:px-8 lg:px-12;
+    --gutter: 1.25rem;
+    @apply mx-auto w-full max-w-[88rem];
+    padding-left: max(var(--gutter), env(safe-area-inset-left, 0px));
+    padding-right: max(var(--gutter), env(safe-area-inset-right, 0px));
   }
+  @media (min-width: 640px) { .shell { --gutter: 2rem; } }
+  @media (min-width: 1024px) { .shell { --gutter: 3rem; } }
 
   /* ---- Type: three voices ---------------------------------------------- */
 
@@ -450,13 +466,19 @@
 }
 
 /* ---- Hero sizing (plain CSS: sized against both width and height so the cover always fits) ---- */
-.hero-witches { font-size: min(27vw, 17dvh); line-height: 0.84; }
-.hero-glow { font-size: min(24vw, 26dvh); }
-.hero-run { font-size: min(30vw, 19dvh); line-height: 0.84; }
+.hero-witches { font-size: min(27vw, calc(var(--vh) * 17)); line-height: 0.84; }
+.hero-glow { font-size: min(24vw, calc(var(--vh) * 26)); }
+.hero-run { font-size: min(30vw, calc(var(--vh) * 19)); line-height: 0.84; }
 @media (min-width: 768px) {
-  .hero-witches { font-size: min(12vw, 14.5dvh); }
-  .hero-glow { font-size: min(21vw, 28.5dvh); }
-  .hero-run { font-size: min(14.5vw, 16.5dvh); }
+  .hero-witches { font-size: min(12vw, calc(var(--vh) * 14.5)); }
+  .hero-glow { font-size: min(21vw, calc(var(--vh) * 28.5)); }
+  .hero-run { font-size: min(14.5vw, calc(var(--vh) * 16.5)); }
+}
+/* Landscape phones: the poster is compacted rather than left three screens tall. */
+@media (max-height: 520px) {
+  .hero-witches { font-size: min(12vw, calc(var(--vh) * 11)); }
+  .hero-glow { font-size: min(21vw, calc(var(--vh) * 21)); }
+  .hero-run { font-size: min(14.5vw, calc(var(--vh) * 12.5)); }
 }
 .glow-echo { translate: 0.04em 0.05em; color: var(--lavender); }
 .glow-ghost { translate: -0.035em -0.04em; color: transparent; -webkit-text-stroke: 2px var(--paper); }

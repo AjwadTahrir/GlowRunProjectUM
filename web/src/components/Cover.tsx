@@ -42,7 +42,7 @@ export function Cover({ status }: { status: EventStatus | null }) {
 
   return (
     <div id="top" className="relative flex min-h-[100dvh] flex-col bg-purple">
-     <div className="relative isolate flex flex-1 flex-col overflow-hidden pt-14">
+     <div className="relative isolate flex flex-1 flex-col overflow-hidden pt-[var(--header-h)]">
       <Moon size="min(30vw, 40dvh)" className="right-[10vw] top-[14dvh] md:right-[7vw] md:top-[10dvh]" style={{ zIndex: -1 }} />
       <Stars items={STARS} className="-z-10" />
 
@@ -122,7 +122,7 @@ export function Cover({ status }: { status: EventStatus | null }) {
      </div>
 
       {/* The stub: a torn ticket edge, and the one thing to do. */}
-      <div className="scallop-top relative z-10 bg-ink pb-8 pt-12 md:pb-10 md:pt-14 [@media(max-height:830px)]:pb-6 [@media(max-height:830px)]:pt-10">
+      <div className="scallop-top relative z-10 bg-ink pb-[calc(2rem+var(--safe-bottom))] pt-12 md:pb-[calc(2.5rem+var(--safe-bottom))] md:pt-14 [@media(max-height:830px)]:pb-[calc(1.5rem+var(--safe-bottom))] [@media(max-height:830px)]:pt-10">
         <div className="shell grid items-end gap-x-10 gap-y-8 md:grid-cols-12">
           <dl className="order-2 grid grid-cols-3 gap-x-6 md:order-1 md:col-span-6">
             {spec('Date', eventConfig.date)}
