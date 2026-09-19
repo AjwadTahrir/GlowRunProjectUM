@@ -1,7 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AlertTriangle, CheckCircle2, FileUp, Loader2, Lock } from 'lucide-react';
 import { eventConfig } from '../config/event';
 import {
   ApiFailure,
@@ -12,13 +11,33 @@ import {
   type RegistrationResult,
 } from '../lib/api';
 import { CATEGORIES, CATEGORY_LABELS, registrationSchema, type RegistrationFormValues } from '../lib/validation';
-import { MissingAsset, PosterFrame } from './ui';
+import { Artwork, MissingAsset } from './ui';
+
+/**
+ * The form is presented as a paper entry form — ruled fields, numbered parts,
+ * mono labels — but the logic is untouched: same validation, same signed upload
+ * reference, same idempotency key, same server as the authority on capacity.
+ */
 
 type UploadState =
   | { phase: 'idle' }
   | { phase: 'uploading'; name: string; percent: number }
   | { phase: 'ready'; name: string; ref: string }
   | { phase: 'error'; name: string; message: string };
+
+/** A numbered part of the form. Editorial markers, not a multi-screen wizard. */
+function Part({ index, title, children }: { index: string; title: string; children: React.ReactNode }) {
+  return (
+    <fieldset className="grid gap-8 border-t border-[color:var(--rule)] pt-8 lg:grid-cols-12">
+      <legend className="sr-only">{title}</legend>
+      <div className="flex items-baseline gap-4 lg:col-span-3 lg:flex-col lg:gap-1">
+        <span className="font-mono text-xs text-gold">{index}</span>
+        <span className="tech text-paper">{title}</span>
+      </div>
+      <div className="space-y-8 lg:col-span-8">{children}</div>
+    </fieldset>
+  );
+}
 
 export function RegistrationForm({
   status,
@@ -31,8 +50,8 @@ export function RegistrationForm({
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  // Generated once per attempt and reused on retry, so a double tap, a slow
-  // connection or a refresh cannot book two places.
+  // Generated once per attempt and reused on retry, so a double tap or a flaky
+  // connection cannot book two places.
   const idempotencyKey = useRef(newIdempotencyKey());
 
   const {
@@ -47,9 +66,7 @@ export function RegistrationForm({
     defaultValues: { category: undefined, tshirtSize: '', termsAccepted: false as never },
   });
 
-  const category = watch('category');
-  const isStudent = category === 'um_student';
-
+  const isStudent = watch('category') === 'um_student';
   const closed = status && (!status.registration.open || status.registration.isFull);
 
   async function onFileChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -83,7 +100,7 @@ export function RegistrationForm({
     try {
       const payload: RegistrationFormValues = {
         ...values,
-        // A matriculation number typed before switching category never leaves the browser.
+        // A matric number typed before switching category never leaves the browser.
         matriculationNumber: values.category === 'um_student' ? values.matriculationNumber : undefined,
       };
 
@@ -91,15 +108,12 @@ export function RegistrationForm({
       onRegistered(result.registration);
     } catch (error) {
       if (error instanceof ApiFailure) {
-        // Server-side field errors land on the matching inputs.
         if (error.fields) {
           for (const [field, message] of Object.entries(error.fields)) {
             setError(field as keyof RegistrationFormValues, { message });
           }
         }
-        if (error.code === 'invalid_upload_reference') {
-          setUpload({ phase: 'idle' });
-        }
+        if (error.code === 'invalid_upload_reference') setUpload({ phase: 'idle' });
         setSubmitError(error.message);
       } else {
         setSubmitError('We could not reach the server. Check your connection and try again.');
@@ -111,29 +125,27 @@ export function RegistrationForm({
 
   if (closed) {
     return (
-      <div className="panel border-glow/30">
-        <h3 className="font-display text-2xl text-white">
+      <div className="border-t border-gold pt-10">
+        <h3 className="display-lg">
           {status!.registration.isFull ? 'All places have been taken' : 'Registration is closed'}
         </h3>
-        <p className="lede">
+        <p className="mt-6 max-w-[46ch] leading-relaxed text-paper/70">
           {status!.registration.isFull
-            ? `Witches Glow Run is capped at ${status!.registration.maxCapacity} participants and every place is now filled. There is no waiting list.`
+            ? `Witches Glow Run is capped at ${status!.registration.maxCapacity} participants and every place is filled. There is no waiting list.`
             : (status!.registration.closedReason ?? 'Registration is not open at the moment.')}
         </p>
-        <p className="mt-4 text-sm text-violet-mist">
-          Already registered? Keep your registration ID — the organiser will contact you about payment verification.
+        <p className="tech mt-8 normal-case tracking-normal text-grey">
+          Already registered? Keep your registration ID — the organiser will be in touch about payment verification.
         </p>
       </div>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-10">
-      <fieldset className="panel space-y-5">
-        <legend className="font-display text-xl text-white">Your details</legend>
-
+    <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-12">
+      <Part index="01" title="Participant">
         <div>
-          <label htmlFor="email" className="field-label">
+          <label htmlFor="email" className="tech block">
             Email address
           </label>
           <input
@@ -141,50 +153,74 @@ export function RegistrationForm({
             type="email"
             autoComplete="email"
             inputMode="email"
-            className="field-input"
+            className="field"
             aria-invalid={Boolean(errors.email)}
             aria-describedby={errors.email ? 'email-error' : undefined}
             {...register('email')}
           />
           {errors.email && (
             <p id="email-error" className="field-error" role="alert">
-              <AlertTriangle aria-hidden className="mt-0.5 h-4 w-4 shrink-0" />
               {errors.email.message}
             </p>
           )}
         </div>
 
         <div>
-          <label htmlFor="fullName" className="field-label">
+          <label htmlFor="fullName" className="tech block">
             Full name
           </label>
           <input
             id="fullName"
             type="text"
             autoComplete="name"
-            className="field-input"
+            className="field"
             aria-invalid={Boolean(errors.fullName)}
             aria-describedby={errors.fullName ? 'fullName-error' : 'fullName-hint'}
             {...register('fullName')}
           />
-          <p id="fullName-hint" className="field-hint">
-            As it appears on your identification, for race pack collection.
+          <p id="fullName-hint" className="tech mt-2 normal-case tracking-normal">
+            As printed on your identification, for race pack collection.
           </p>
           {errors.fullName && (
             <p id="fullName-error" className="field-error" role="alert">
-              <AlertTriangle aria-hidden className="mt-0.5 h-4 w-4 shrink-0" />
               {errors.fullName.message}
             </p>
           )}
         </div>
 
         <div>
-          <label htmlFor="category" className="field-label">
+          <label htmlFor="phoneNumber" className="tech block">
+            Phone number
+          </label>
+          <input
+            id="phoneNumber"
+            type="tel"
+            autoComplete="tel"
+            inputMode="tel"
+            className="field"
+            aria-invalid={Boolean(errors.phoneNumber)}
+            aria-describedby={errors.phoneNumber ? 'phone-error' : 'phone-hint'}
+            {...register('phoneNumber')}
+          />
+          <p id="phone-hint" className="tech mt-2 normal-case tracking-normal">
+            Malaysian or international — 012-345 6789, or +60 12-345 6789.
+          </p>
+          {errors.phoneNumber && (
+            <p id="phone-error" className="field-error" role="alert">
+              {errors.phoneNumber.message}
+            </p>
+          )}
+        </div>
+      </Part>
+
+      <Part index="02" title="Category">
+        <div>
+          <label htmlFor="category" className="tech block">
             Participant category
           </label>
           <select
             id="category"
-            className="field-input"
+            className="field"
             aria-invalid={Boolean(errors.category)}
             aria-describedby={errors.category ? 'category-error' : undefined}
             defaultValue=""
@@ -201,89 +237,60 @@ export function RegistrationForm({
           </select>
           {errors.category && (
             <p id="category-error" className="field-error" role="alert">
-              <AlertTriangle aria-hidden className="mt-0.5 h-4 w-4 shrink-0" />
               {errors.category.message}
             </p>
           )}
         </div>
 
-        {/* Only UM students see this. Everyone else is never asked. */}
+        {/* Only UM students are asked. Everyone else never sees this field. */}
         {isStudent && (
           <div>
-            <label htmlFor="matriculationNumber" className="field-label">
+            <label htmlFor="matriculationNumber" className="tech block">
               Matriculation number
             </label>
             <input
               id="matriculationNumber"
               type="text"
-              className="field-input"
+              className="field"
               aria-invalid={Boolean(errors.matriculationNumber)}
               aria-describedby={errors.matriculationNumber ? 'matric-error' : undefined}
               {...register('matriculationNumber')}
             />
             {errors.matriculationNumber && (
               <p id="matric-error" className="field-error" role="alert">
-                <AlertTriangle aria-hidden className="mt-0.5 h-4 w-4 shrink-0" />
                 {errors.matriculationNumber.message}
               </p>
             )}
           </div>
         )}
+      </Part>
 
-        <div>
-          <label htmlFor="phoneNumber" className="field-label">
-            Phone number
-          </label>
-          <input
-            id="phoneNumber"
-            type="tel"
-            autoComplete="tel"
-            inputMode="tel"
-            className="field-input"
-            aria-invalid={Boolean(errors.phoneNumber)}
-            aria-describedby={errors.phoneNumber ? 'phone-error' : 'phone-hint'}
-            {...register('phoneNumber')}
-          />
-          <p id="phone-hint" className="field-hint">
-            Malaysian or international. For example 012-345 6789 or +60 12-345 6789.
-          </p>
-          {errors.phoneNumber && (
-            <p id="phone-error" className="field-error" role="alert">
-              <AlertTriangle aria-hidden className="mt-0.5 h-4 w-4 shrink-0" />
-              {errors.phoneNumber.message}
-            </p>
-          )}
-        </div>
-      </fieldset>
-
-      <fieldset className="panel space-y-5">
-        <legend className="font-display text-xl text-white">T-shirt size</legend>
-
+      <Part index="03" title="Shirt">
         {eventConfig.posters.sizeChart ? (
-          <PosterFrame
+          <Artwork
             src={eventConfig.posters.sizeChart}
             alt="Official T-shirt size chart with measurements"
-            caption="Tap to enlarge the size chart."
+            caption="Tap to enlarge the size chart"
           />
         ) : (
           <MissingAsset what="T-shirt size chart" />
         )}
 
-        <p className="field-hint">
+        <p className="tech normal-case tracking-normal">
           {eventConfig.tshirt.chartNote.confirmed ? (
             eventConfig.tshirt.chartNote.value
           ) : (
-            <span className="placeholder-flag">Measurements not supplied</span>
+            <span className="flag">Measurements not supplied</span>
           )}
         </p>
 
         <div>
-          <label htmlFor="tshirtSize" className="field-label">
+          <label htmlFor="tshirtSize" className="tech block">
             Your size
           </label>
           <select
             id="tshirtSize"
-            className="field-input"
+            className="field"
             aria-invalid={Boolean(errors.tshirtSize)}
             aria-describedby={errors.tshirtSize ? 'size-error' : undefined}
             {...register('tshirtSize')}
@@ -299,122 +306,98 @@ export function RegistrationForm({
           </select>
           {errors.tshirtSize && (
             <p id="size-error" className="field-error" role="alert">
-              <AlertTriangle aria-hidden className="mt-0.5 h-4 w-4 shrink-0" />
               {errors.tshirtSize.message}
             </p>
           )}
         </div>
-      </fieldset>
+      </Part>
 
-      <fieldset className="panel space-y-4">
-        <legend className="font-display text-xl text-white">Proof of payment</legend>
-        <p className="text-sm text-violet-mist">
-          Upload your transfer receipt. Only the organising committee can open it — receipts are never published.
-        </p>
+      <Part index="04" title="Payment">
+        <div>
+          <label htmlFor="paymentProof" className="tech block">
+            Proof of payment
+          </label>
+          <input
+            id="paymentProof"
+            type="file"
+            accept={(status?.upload.allowedMimeTypes ?? ['image/jpeg', 'image/png', 'application/pdf']).join(',')}
+            onChange={onFileChange}
+            className="field py-4 file:mr-4 file:border-0 file:bg-gold file:px-4 file:py-2 file:font-mono file:text-xs file:uppercase file:tracking-[0.14em] file:text-ink"
+            aria-describedby="upload-status"
+          />
 
-        <label htmlFor="paymentProof" className="field-label">
-          Receipt file
-        </label>
-        <input
-          id="paymentProof"
-          type="file"
-          accept={(status?.upload.allowedMimeTypes ?? ['image/jpeg', 'image/png', 'application/pdf']).join(',')}
-          onChange={onFileChange}
-          className="field-input file:mr-3 file:rounded-full file:border-0 file:bg-glow file:px-4 file:py-2 file:text-sm file:font-medium file:text-ink"
-          aria-describedby="upload-status"
-        />
-
-        <div id="upload-status" aria-live="polite" className="text-sm">
-          {upload.phase === 'uploading' && (
-            <div className="text-violet-mist">
-              <span className="flex items-center gap-2">
-                <Loader2 aria-hidden className="h-4 w-4 animate-spin" />
-                Uploading {upload.name} — {upload.percent}%
-              </span>
-              <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-white/10">
-                <div className="h-full bg-glow transition-all" style={{ width: `${upload.percent}%` }} />
-              </div>
-            </div>
-          )}
-          {upload.phase === 'ready' && (
-            <p className="flex items-center gap-2 text-glow">
-              <CheckCircle2 aria-hidden className="h-4 w-4" />
-              {upload.name} uploaded
-            </p>
-          )}
-          {upload.phase === 'error' && (
-            <p className="field-error" role="alert">
-              <AlertTriangle aria-hidden className="mt-0.5 h-4 w-4 shrink-0" />
-              {upload.message}
-            </p>
-          )}
-          {upload.phase === 'idle' && (
-            <p className="flex items-center gap-2 text-violet-mist">
-              <FileUp aria-hidden className="h-4 w-4" />
-              JPG, PNG, WebP or PDF, up to{' '}
-              {Math.round((status?.upload.maxBytes ?? 5 * 1024 * 1024) / 1024 / 1024)} MB.
-            </p>
-          )}
-        </div>
-      </fieldset>
-
-      <fieldset id="terms" className="panel space-y-4">
-        <legend className="font-display text-xl text-white">Terms and conditions</legend>
-
-        <details className="rounded-xl border border-white/10 bg-ink/50 p-4">
-          <summary className="cursor-pointer text-white">Read the full terms ({eventConfig.terms.version})</summary>
-          <div className="mt-3 max-w-prose text-sm text-violet-mist">
-            {eventConfig.terms.body.confirmed ? (
-              eventConfig.terms.body.value
-            ) : (
+          <div id="upload-status" aria-live="polite" className="mt-3">
+            {upload.phase === 'uploading' && (
               <>
-                <span className="placeholder-flag">Not approved</span>
-                <p className="mt-2">{eventConfig.terms.body.value}</p>
+                <p className="tech normal-case tracking-normal">
+                  Uploading {upload.name} — {upload.percent}%
+                </p>
+                <div className="mt-2 h-px w-full bg-[color:var(--rule)]">
+                  <div className="h-px bg-gold transition-all" style={{ width: `${upload.percent}%` }} />
+                </div>
               </>
             )}
+            {upload.phase === 'ready' && (
+              <p className="tech-gold normal-case tracking-normal">{upload.name} uploaded</p>
+            )}
+            {upload.phase === 'error' && (
+              <p className="field-error" role="alert">
+                {upload.message}
+              </p>
+            )}
+            {upload.phase === 'idle' && (
+              <p className="tech normal-case tracking-normal">
+                JPG, PNG, WebP or PDF, up to{' '}
+                {Math.round((status?.upload.maxBytes ?? 5 * 1024 * 1024) / 1024 / 1024)} MB. Only the
+                organising committee can open it.
+              </p>
+            )}
           </div>
-        </details>
-
-        <div className="flex items-start gap-3">
-          <input
-            id="termsAccepted"
-            type="checkbox"
-            className="mt-1 h-5 w-5 shrink-0 rounded border-white/30 bg-ink accent-[#F5C542]"
-            aria-invalid={Boolean(errors.termsAccepted)}
-            aria-describedby={errors.termsAccepted ? 'terms-error' : undefined}
-            {...register('termsAccepted')}
-          />
-          <label htmlFor="termsAccepted" className="text-sm text-white">
-            {eventConfig.terms.checkboxLabel}
-          </label>
         </div>
-        {errors.termsAccepted && (
-          <p id="terms-error" className="field-error" role="alert">
-            <AlertTriangle aria-hidden className="mt-0.5 h-4 w-4 shrink-0" />
-            {errors.termsAccepted.message}
-          </p>
-        )}
-      </fieldset>
+
+        <div id="terms" className="border-t border-[color:var(--rule)] pt-6">
+          <details>
+            <summary className="tech cursor-pointer text-paper">
+              Terms and conditions — {eventConfig.terms.version}
+            </summary>
+            <div className="mt-4 max-w-[54ch] text-sm leading-relaxed text-paper/70">
+              {!eventConfig.terms.body.confirmed && <span className="flag">Not approved</span>}
+              <p className="mt-2">{eventConfig.terms.body.value}</p>
+            </div>
+          </details>
+
+          <div className="mt-6 flex items-start gap-4">
+            <input
+              id="termsAccepted"
+              type="checkbox"
+              className="mt-1 h-5 w-5 shrink-0 rounded-none border border-paper/40 bg-transparent accent-[#F5C542]"
+              aria-invalid={Boolean(errors.termsAccepted)}
+              aria-describedby={errors.termsAccepted ? 'terms-error' : undefined}
+              {...register('termsAccepted')}
+            />
+            <label htmlFor="termsAccepted" className="max-w-[54ch] text-sm leading-relaxed text-paper/80">
+              {eventConfig.terms.checkboxLabel}
+            </label>
+          </div>
+          {errors.termsAccepted && (
+            <p id="terms-error" className="field-error" role="alert">
+              {errors.termsAccepted.message}
+            </p>
+          )}
+        </div>
+      </Part>
 
       {submitError && (
-        <p className="panel border-red-400/40 text-red-200" role="alert">
+        <p className="border-l-2 border-red-400 py-2 pl-4 font-mono text-sm text-red-300" role="alert">
           {submitError}
         </p>
       )}
 
-      <div className="flex flex-wrap items-center gap-4">
-        <button type="submit" className="btn-primary" disabled={submitting}>
-          {submitting ? (
-            <>
-              <Loader2 aria-hidden className="h-5 w-5 animate-spin" />
-              Registering…
-            </>
-          ) : (
-            'Complete registration'
-          )}
+      <div className="flex flex-wrap items-center gap-6 border-t border-[color:var(--rule)] pt-8">
+        <button type="submit" className="btn-gold" disabled={submitting}>
+          {submitting ? 'Registering…' : 'Complete registration'}
         </button>
-        <p className="flex items-center gap-2 text-sm text-violet-mist">
-          <Lock aria-hidden className="h-4 w-4" />
+        <p className="tech normal-case tracking-normal">
           Your place is confirmed only once the server accepts it.
         </p>
       </div>

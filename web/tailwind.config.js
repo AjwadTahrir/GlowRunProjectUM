@@ -4,17 +4,18 @@ export default {
   theme: {
     extend: {
       colors: {
-        // The four brand colours, plus two support tones mixed from them, so
-        // surfaces can step apart without introducing a fifth hue.
         ink: '#0D0B12',
-        violet: { DEFAULT: '#30104B', deep: '#1B0A2B', mist: '#B9A8D0' },
-        glow: '#F5C542',
+        paper: '#F4F0E8',   // warm off-white: reads as ink on a poster, not UI white
+        gold: '#F5C542',
+        purple: '#30104B',  // flat fields only, never a gradient
+        grey: '#77727D',
       },
       fontFamily: {
-        display: ['Fraunces', 'Georgia', 'serif'],
-        sans: ['Outfit', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        display: ['"Instrument Serif"', 'Georgia', 'serif'],
+        sans: ['Archivo', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        mono: ['"IBM Plex Mono"', 'ui-monospace', 'monospace'],
       },
-      maxWidth: { prose: '68ch' },
+      letterSpacing: { tightest: '-0.04em' },
     },
   },
   plugins: [],

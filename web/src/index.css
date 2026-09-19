@@ -2,114 +2,177 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+  Witches Glow Run — visual system.
+
+  The page is one race poster, printed in three inks on black stock:
+  paper (off-white), gold, purple. No gradients, no glow, no blur.
+  Structure carries the design; colour is used sparingly and flat.
+*/
+
 @layer base {
   :root {
     color-scheme: dark;
+    --rule: rgba(244, 240, 232, 0.18);
   }
 
   html {
     scroll-behavior: smooth;
-    scroll-padding-top: 5rem; /* clears the sticky header on anchor jumps */
+    scroll-padding-top: 4rem;
   }
 
   body {
-    @apply bg-ink text-white font-sans antialiased;
-    /* One violet wash from the top, so the page reads as night rather than flat black. */
-    background-image: radial-gradient(120% 60% at 50% -10%, #30104b 0%, #1b0a2b 38%, #0d0b12 72%);
-    background-attachment: fixed;
+    @apply bg-ink text-paper font-sans antialiased;
   }
 
-  /* A focus ring that survives against both the dark ground and the gold buttons. */
-  :focus-visible {
-    outline: 3px solid #f5c542;
-    outline-offset: 3px;
-    border-radius: 2px;
+  /* Print grain. One fixed overlay rather than a texture on every surface. */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    pointer-events: none;
+    opacity: 0.055;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
   }
 
   h1, h2, h3 {
-    @apply font-display;
-    font-variation-settings: 'opsz' 96;
+    @apply font-display font-normal;
+  }
+
+  /* Gold on black is the only pairing with enough contrast to carry focus. */
+  :focus-visible {
+    outline: 2px solid #f5c542;
+    outline-offset: 3px;
+  }
+
+  ::selection {
+    background: #f5c542;
+    color: #0d0b12;
   }
 }
 
 @layer components {
   .shell {
-    @apply mx-auto w-full max-w-6xl px-5 sm:px-8;
+    @apply mx-auto w-full max-w-[84rem] px-5 sm:px-8;
   }
 
-  .section-heading {
-    @apply font-display text-3xl font-semibold leading-tight text-white sm:text-4xl;
+  /* Technical data: times, distances, fees, IDs, field labels. */
+  .tech {
+    @apply font-mono text-[0.7rem] uppercase tracking-[0.18em] text-grey;
   }
 
-  .lede {
-    @apply mt-3 max-w-prose text-violet-mist;
+  .tech-gold {
+    @apply font-mono text-[0.7rem] uppercase tracking-[0.18em] text-gold;
   }
 
-  /* One glow, used only on the primary action, so it keeps meaning something. */
-  .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-full bg-glow px-7 py-3.5
-           text-base font-semibold text-ink transition
-           hover:brightness-110 active:brightness-95
-           disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none;
-    box-shadow: 0 0 0 1px rgba(245, 197, 66, 0.4), 0 0 32px -6px rgba(245, 197, 66, 0.55);
+  /* Section marker: a number and a name on a rule. Sequence, not decoration. */
+  .marker {
+    @apply flex items-baseline gap-4 border-t border-[color:var(--rule)] pt-4;
+  }
+
+  .display-xl {
+    @apply font-display leading-[0.84] tracking-tightest;
+    font-size: clamp(3.5rem, 15vw, 13rem);
+  }
+
+  .display-lg {
+    @apply font-display leading-[0.9] tracking-tightest;
+    font-size: clamp(2.5rem, 7vw, 5.5rem);
+  }
+
+  /* The one graphic liberty on the page: GLOW is set hollow. */
+  .outlined {
+    color: transparent;
+    -webkit-text-stroke: 1.5px #f5c542;
+    paint-order: stroke fill;
+  }
+
+  @supports not (-webkit-text-stroke: 1px black) {
+    .outlined { color: #f5c542; }
+  }
+
+  /* Corner crop marks, as on a press sheet. */
+  .cropmarks::before,
+  .cropmarks::after {
+    content: '';
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border-color: rgba(244, 240, 232, 0.35);
+  }
+  .cropmarks::before {
+    top: 1.25rem; left: 1.25rem;
+    border-top: 1px solid; border-left: 1px solid;
+  }
+  .cropmarks::after {
+    bottom: 1.25rem; right: 1.25rem;
+    border-bottom: 1px solid; border-right: 1px solid;
+  }
+
+  .btn-gold {
+    @apply inline-flex items-center justify-center bg-gold px-8 py-4 font-mono text-xs
+           uppercase tracking-[0.18em] text-ink transition-colors
+           hover:bg-paper disabled:cursor-not-allowed disabled:opacity-40;
+    min-height: 52px;
+  }
+
+  .btn-outline {
+    @apply inline-flex items-center justify-center border border-[color:var(--rule)] px-8 py-4
+           font-mono text-xs uppercase tracking-[0.18em] text-paper transition-colors
+           hover:border-gold hover:text-gold;
+    min-height: 52px;
+  }
+
+  /* Form fields are ruled lines, not boxes. Closer to a paper entry form. */
+  .field {
+    @apply w-full border-0 border-b border-[color:var(--rule)] bg-transparent px-0 py-3
+           font-sans text-lg text-paper transition-colors
+           placeholder:text-grey focus:border-gold focus:outline-none focus:ring-0;
     min-height: 48px;
+    border-radius: 0;
   }
 
-  .btn-quiet {
-    @apply inline-flex items-center justify-center gap-2 rounded-full border border-white/25
-           px-6 py-3 text-base text-white transition hover:border-glow hover:text-glow;
-    min-height: 48px;
-  }
-
-  .panel {
-    @apply rounded-2xl border border-white/10 bg-white/[0.04] p-6 backdrop-blur-sm;
-  }
-
-  .field-label {
-    @apply mb-1.5 block text-sm font-medium text-white;
-  }
-
-  .field-input {
-    @apply w-full rounded-xl border border-white/15 bg-ink/70 px-4 py-3 text-base text-white
-           placeholder:text-white/35
-           focus:border-glow focus:outline-none;
-    min-height: 48px;
-  }
-
-  .field-input[aria-invalid='true'] {
+  .field[aria-invalid='true'] {
     @apply border-red-400;
   }
 
+  select.field {
+    /* Native arrow is invisible on black in several browsers. */
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none' stroke='%2377727D' stroke-width='1.5'%3E%3Cpath d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.25rem center;
+  }
+
   .field-error {
-    @apply mt-1.5 flex items-start gap-1.5 text-sm text-red-300;
+    @apply mt-2 font-mono text-xs uppercase tracking-[0.12em] text-red-400;
   }
 
-  .field-hint {
-    @apply mt-1.5 text-sm text-violet-mist;
-  }
-
-  /* Marks anything the organiser has not yet confirmed. Loud on purpose. */
-  .placeholder-flag {
-    @apply inline-flex items-center gap-1.5 rounded-md border border-dashed border-glow/70
-           bg-glow/10 px-2 py-0.5 text-xs font-medium text-glow;
+  .flag {
+    @apply inline-block border border-dashed border-gold/60 px-2 py-0.5 font-mono
+           text-[0.65rem] uppercase tracking-[0.14em] text-gold;
   }
 }
 
-/* The single page-load moment: the hero title rises once. Nothing else animates on scroll. */
-@keyframes rise {
-  from { opacity: 0; transform: translateY(14px); }
+/*
+  Two entrances, both on first paint, both once. Nothing animates on scroll.
+  The page is fully designed with all of this disabled.
+*/
+@keyframes lift {
+  from { opacity: 0; transform: translateY(0.6em); }
   to   { opacity: 1; transform: none; }
 }
 
-.rise {
-  animation: rise 700ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
-}
+.lift   { animation: lift 900ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+.lift-2 { animation-delay: 110ms; }
+.lift-3 { animation-delay: 220ms; }
+.lift-4 { animation-delay: 380ms; }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
 }
