@@ -2,114 +2,461 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+  Witches Glow Run: glow night.
+
+  A Halloween night run, printed like a race poster. Ink and purple are the night,
+  gold is the glow, paper is what you can read. Lavender is the magic: halftone
+  halos, sparkles and print echoes. Emerald is the witch, used sparingly.
+
+  Glow is never a blur. It is dots and hard offset print layers.
+  Every graphic is built from geometry and has a job: route, moon, bib, ticket.
+*/
+
 @layer base {
   :root {
     color-scheme: dark;
+    --ink: #0d0b12;
+    --purple: #30104b;
+    --gold: #f5c542;
+    --paper: #f4f0e8;
+    --lavender: #a388ee;
+    --emerald: #094f39;
+    --ground: var(--ink); /* what a ticket notch must match */
+    --cut: clamp(1.5rem, 5vw, 5rem);
   }
 
   html {
     scroll-behavior: smooth;
-    scroll-padding-top: 5rem; /* clears the sticky header on anchor jumps */
+    scroll-padding-top: 4rem;
+    background: var(--ink);
   }
 
   body {
-    @apply bg-ink text-white font-sans antialiased;
-    /* One violet wash from the top, so the page reads as night rather than flat black. */
-    background-image: radial-gradient(120% 60% at 50% -10%, #30104b 0%, #1b0a2b 38%, #0d0b12 72%);
-    background-attachment: fixed;
+    @apply bg-ink font-sans text-paper antialiased;
+    overflow-x: clip;
   }
 
-  /* A focus ring that survives against both the dark ground and the gold buttons. */
+  /* Print grain: one fixed overlay, never a texture on scrolling surfaces. */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    pointer-events: none;
+    opacity: 0.045;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
   :focus-visible {
-    outline: 3px solid #f5c542;
+    outline: 3px solid var(--gold);
     outline-offset: 3px;
-    border-radius: 2px;
   }
 
-  h1, h2, h3 {
-    @apply font-display;
-    font-variation-settings: 'opsz' 96;
+  ::selection {
+    background: var(--gold);
+    color: var(--ink);
   }
 }
 
 @layer components {
   .shell {
-    @apply mx-auto w-full max-w-6xl px-5 sm:px-8;
+    @apply mx-auto w-full max-w-[88rem] px-5 sm:px-8 lg:px-12;
   }
 
-  .section-heading {
-    @apply font-display text-3xl font-semibold leading-tight text-white sm:text-4xl;
+  /* ---- Type: three voices ---------------------------------------------- */
+
+  /* Compressed: facts, names, headlines. */
+  .display {
+    font-family: 'Archivo Variable', 'Arial Narrow', sans-serif;
+    font-stretch: 62%;
+    font-weight: 850;
+    text-transform: uppercase;
+    letter-spacing: 0.005em;
+    line-height: 0.88;
   }
 
-  .lede {
-    @apply mt-3 max-w-prose text-violet-mist;
+  /* Expanded italic: energy. GLOW, celebration, the loud words. */
+  .wide {
+    font-family: 'Archivo Variable', sans-serif;
+    font-stretch: 125%;
+    font-style: italic;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: -0.03em;
+    line-height: 0.86;
   }
 
-  /* One glow, used only on the primary action, so it keeps meaning something. */
-  .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-full bg-glow px-7 py-3.5
-           text-base font-semibold text-ink transition
-           hover:brightness-110 active:brightness-95
-           disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none;
-    box-shadow: 0 0 0 1px rgba(245, 197, 66, 0.4), 0 0 32px -6px rgba(245, 197, 66, 0.55);
+  /* Outline: ghost echoes, at large sizes only. */
+  .outline-lavender { color: transparent; -webkit-text-stroke: 2px var(--lavender); }
+  .outline-paper { color: transparent; -webkit-text-stroke: 2px var(--paper); }
+  .outline-gold { color: transparent; -webkit-text-stroke: 2px var(--gold); }
+  @supports not (-webkit-text-stroke: 1px black) {
+    .outline-lavender { color: var(--lavender); }
+    .outline-paper { color: var(--paper); }
+    .outline-gold { color: var(--gold); }
+  }
+
+  .display-l { font-size: clamp(3.75rem, 13vw, 12rem); }
+  .display-h { font-size: clamp(2.75rem, 6.2vw, 6rem); }
+  .display-m { font-size: clamp(3rem, 8vw, 6.5rem); }
+  .display-s { font-size: clamp(1.6rem, 3.2vw, 2.6rem); line-height: 0.98; }
+
+  /* Technical data: times, distances, fees, registration numbers. */
+  .figure {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .tech {
+    @apply font-mono text-xs font-medium uppercase tracking-[0.12em] text-paper/75;
+  }
+
+  /* Technical label that takes the colour of whatever it is printed on. */
+  .tech-on {
+    @apply font-mono text-xs font-medium uppercase tracking-[0.12em];
+    opacity: 0.8;
+  }
+
+  /* Sentence-case label for anything a person has to read or fill in. */
+  .label { @apply block text-sm font-semibold text-paper; }
+  .hint { @apply mt-2 text-sm leading-snug text-paper/75; }
+  .lede { @apply max-w-[46ch] text-lg leading-relaxed text-paper/85; }
+
+  /* Section index: a stop on the route. */
+  .folio {
+    display: inline-block;
+    margin-left: 0.7rem;
+    transform: translateY(0.35rem);
+    vertical-align: top;
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 0.8rem;
+    font-weight: 500;
+    font-stretch: 100%;
+    font-style: normal;
+    letter-spacing: 0.12em;
+    line-height: 1;
+    color: var(--gold);
+  }
+
+  /* ---- Placement: tilt, reveal ------------------------------------------ */
+
+  /* Tilt uses the individual `rotate` property so it never fights reveal transforms. */
+  .tilt { rotate: var(--tilt, 0deg); }
+
+  .reveal {
+    transition:
+      translate 900ms cubic-bezier(0.34, 1.4, 0.64, 1),
+      scale 900ms cubic-bezier(0.34, 1.4, 0.64, 1),
+      rotate 900ms cubic-bezier(0.34, 1.4, 0.64, 1),
+      opacity 500ms ease;
+  }
+  .reveal--pending {
+    opacity: 0;
+    translate: var(--fx, 0) var(--fy, 0);
+    scale: var(--fs, 1);
+    rotate: calc(var(--tilt, 0deg) + var(--fr, 0deg));
+  }
+
+  /* ---- Section shapes --------------------------------------------------- */
+
+  .cut-a { clip-path: polygon(0 var(--cut), 100% 0, 100% calc(100% - var(--cut)), 0 100%); }
+  .cut-b { clip-path: polygon(0 0, 100% var(--cut), 100% 100%, 0 calc(100% - var(--cut))); }
+
+  /* Torn edge along the bottom, for slips of paper. */
+  .torn {
+    clip-path: polygon(0 0, 100% 0, 100.0% 100%, 95.8% 92%, 91.7% 100%, 87.5% 92%, 83.3% 100%, 79.2% 92%, 75.0% 100%, 70.8% 92%, 66.7% 100%, 62.5% 92%, 58.3% 100%, 54.2% 92%, 50.0% 100%, 45.8% 92%, 41.7% 100%, 37.5% 92%, 33.3% 100%, 29.2% 92%, 25.0% 100%, 20.8% 92%, 16.7% 100%, 12.5% 92%, 8.3% 100%, 4.2% 92%, 0.0% 100%);
+  }
+
+  /* Ticket stub scallops along the top edge. */
+  .scallop-top {
+    -webkit-mask-image: radial-gradient(circle at 14px 0, transparent 10px, #000 10.5px);
+    mask-image: radial-gradient(circle at 14px 0, transparent 10px, #000 10.5px);
+    -webkit-mask-size: 28px 100%;
+    mask-size: 28px 100%;
+    -webkit-mask-repeat: repeat-x;
+    mask-repeat: repeat-x;
+  }
+
+  /* ---- Stickers and tape ------------------------------------------------ */
+
+  /* Hard offset print layer, no blur. */
+  .sticker { filter: drop-shadow(4px 5px 0 var(--ink)); }
+  .sticker-lav { filter: drop-shadow(4px 5px 0 var(--lavender)); }
+
+  .burst {
+    clip-path: polygon(50.0% 0.0%, 60.6% 10.4%, 75.0% 6.7%, 79.0% 21.0%, 93.3% 25.0%, 89.6% 39.4%, 100.0% 50.0%, 89.6% 60.6%, 93.3% 75.0%, 79.0% 79.0%, 75.0% 93.3%, 60.6% 89.6%, 50.0% 100.0%, 39.4% 89.6%, 25.0% 93.3%, 21.0% 79.0%, 6.7% 75.0%, 10.4% 60.6%, 0.0% 50.0%, 10.4% 39.4%, 6.7% 25.0%, 21.0% 21.0%, 25.0% 6.7%, 39.4% 10.4%);
+  }
+
+  .tape {
+    clip-path: polygon(0 0, 2.5% 14%, 0 28%, 2.5% 42%, 0 56%, 2.5% 70%, 0 84%, 2.5% 100%, 97.5% 100%, 100% 84%, 97.5% 70%, 100% 56%, 97.5% 42%, 100% 28%, 97.5% 14%, 100% 0);
+  }
+
+  /* ---- Tickets ---------------------------------------------------------- */
+
+  .notch {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    border-radius: 9999px;
+    background: var(--ground);
+  }
+
+  /* ---- The moon ---------------------------------------------------------
+     A crescent in gold, glowing in halftone: five rings of lavender dots, each a
+     size smaller than the last, with the densest ring showing through the bite. */
+  .halo { position: absolute; aspect-ratio: 1; border-radius: 9999px; overflow: hidden; }
+  .halo i { position: absolute; inset: 0; background-size: 15px 15px; }
+  .halo i:nth-child(1) {
+    background-image: radial-gradient(circle, var(--lavender) 0 5.8px, transparent 6.2px);
+    mask-image: radial-gradient(circle closest-side, #000 0 30%, transparent 30.4%);
+    -webkit-mask-image: radial-gradient(circle closest-side, #000 0 30%, transparent 30.4%);
+  }
+  .halo i:nth-child(2) {
+    background-image: radial-gradient(circle, var(--lavender) 0 4.4px, transparent 4.8px);
+    background-position: 7.5px 7.5px;
+    mask-image: radial-gradient(circle closest-side, transparent 0 30%, #000 30.4% 46%, transparent 46.4%);
+    -webkit-mask-image: radial-gradient(circle closest-side, transparent 0 30%, #000 30.4% 46%, transparent 46.4%);
+  }
+  .halo i:nth-child(3) {
+    background-image: radial-gradient(circle, var(--lavender) 0 3.2px, transparent 3.6px);
+    mask-image: radial-gradient(circle closest-side, transparent 0 46%, #000 46.4% 60%, transparent 60.4%);
+    -webkit-mask-image: radial-gradient(circle closest-side, transparent 0 46%, #000 46.4% 60%, transparent 60.4%);
+  }
+  .halo i:nth-child(4),
+  .halo i:nth-child(5) { display: none; }
+  .halo i:nth-child(4) {
+    background-image: radial-gradient(circle, var(--lavender) 0 2.2px, transparent 2.6px);
+    background-position: 7.5px 7.5px;
+    mask-image: radial-gradient(circle closest-side, transparent 0 60%, #000 60.4% 74%, transparent 74.4%);
+    -webkit-mask-image: radial-gradient(circle closest-side, transparent 0 60%, #000 60.4% 74%, transparent 74.4%);
+  }
+  .halo i:nth-child(5) {
+    background-image: radial-gradient(circle, var(--lavender) 0 1.3px, transparent 1.7px);
+    mask-image: radial-gradient(circle closest-side, transparent 0 74%, #000 74.4% 88%, transparent 88.4%);
+    -webkit-mask-image: radial-gradient(circle closest-side, transparent 0 74%, #000 74.4% 88%, transparent 88.4%);
+  }
+
+  /* ---- Hero wordmark ---------------------------------------------------- */
+
+  .glow-stack { display: grid; }
+  .glow-stack > * { grid-area: 1 / 1; }
+
+  /* ---- Route ------------------------------------------------------------ */
+
+  .trail-line {
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 1 2;
+    transition: stroke-dashoffset 2200ms cubic-bezier(0.5, 0, 0.2, 1);
+  }
+  .trail-line--pending { stroke-dashoffset: 1; }
+  .trail-line--drawn { stroke-dashoffset: 0; }
+
+  .finish-flag {
+    background: conic-gradient(var(--ink) 25%, var(--paper) 0 50%, var(--ink) 0 75%, var(--paper) 0) 0 0 / 50% 50%;
+  }
+
+  /* ---- Blank fields ----------------------------------------------------- */
+
+  /* What an unconfirmed value looks like: the empty line on a printed form. */
+  .blank {
+    display: inline-block;
+    width: var(--w, 9ch);
+    max-width: 100%;
+    height: 0.8em;
+    vertical-align: baseline;
+    border-bottom: 3px solid currentColor;
+    opacity: 0.55;
+  }
+
+  /* A row of a printed programme: label, leader, value. */
+  .leader { display: flex; align-items: baseline; gap: 0.75rem; }
+  .leader::after {
+    content: '';
+    order: 1;
+    flex: 1 1 1rem;
+    min-width: 1rem;
+    border-bottom: 2px dotted currentColor;
+    opacity: 0.4;
+    transform: translateY(-0.2em);
+  }
+  .leader > :last-child { order: 2; }
+
+  /* ---- Controls --------------------------------------------------------- */
+
+  .btn-gold {
+    @apply inline-flex items-center justify-center gap-3 bg-gold px-8 py-4 text-ink transition-[translate,box-shadow,background-color] duration-150
+           hover:bg-paper disabled:cursor-not-allowed disabled:opacity-40;
+    font-family: 'Archivo Variable', sans-serif;
+    font-stretch: 125%;
+    font-style: italic;
+    font-weight: 900;
+    font-size: 1.05rem;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+    min-height: 56px;
+    box-shadow: 5px 5px 0 var(--lavender);
+  }
+  .btn-gold:hover { translate: 2px 2px; box-shadow: 3px 3px 0 var(--lavender); }
+  .btn-gold:active { translate: 5px 5px; box-shadow: 0 0 0 var(--lavender); }
+  .btn-gold:disabled { translate: 0 0; }
+
+  .btn-outline {
+    @apply inline-flex items-center justify-center border-2 border-paper px-6 py-3 font-mono text-sm font-medium
+           uppercase tracking-[0.12em] text-paper transition-colors hover:border-gold hover:text-gold;
     min-height: 48px;
   }
 
-  .btn-quiet {
-    @apply inline-flex items-center justify-center gap-2 rounded-full border border-white/25
-           px-6 py-3 text-base text-white transition hover:border-glow hover:text-glow;
+  /* Form fields are ruled lines, as on a paper entry form. */
+  .field {
+    @apply w-full border-0 border-b-2 border-paper/50 bg-transparent px-0 py-3
+           font-sans text-lg text-paper transition-colors
+           placeholder:text-paper/60 focus:border-gold focus:outline-none focus:ring-0;
     min-height: 48px;
+    border-radius: 0;
   }
+  .field[aria-invalid='true'] { @apply border-signal; }
 
-  .panel {
-    @apply rounded-2xl border border-white/10 bg-white/[0.04] p-6 backdrop-blur-sm;
+  select.field {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none' stroke='%23F5C542' stroke-width='2'%3E%3Cpath d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.25rem center;
   }
+  select.field option { background: var(--ink); color: var(--paper); }
 
-  .field-label {
-    @apply mb-1.5 block text-sm font-medium text-white;
-  }
+  .field-error { @apply mt-2 text-sm font-semibold text-signal; }
 
-  .field-input {
-    @apply w-full rounded-xl border border-white/15 bg-ink/70 px-4 py-3 text-base text-white
-           placeholder:text-white/35
-           focus:border-glow focus:outline-none;
-    min-height: 48px;
-  }
+  /* ---- Race bib --------------------------------------------------------- */
 
-  .field-input[aria-invalid='true'] {
-    @apply border-red-400;
+  .bib {
+    container-type: inline-size;
+    position: relative;
+    aspect-ratio: 7 / 5;
+    background: var(--paper);
+    color: var(--ink);
+    display: grid;
+    grid-template-rows: auto 1fr auto auto;
+    padding: 5cqw 5cqw 0;
   }
-
-  .field-error {
-    @apply mt-1.5 flex items-start gap-1.5 text-sm text-red-300;
+  .bib-hole {
+    position: absolute;
+    width: 3.4cqw;
+    height: 3.4cqw;
+    border-radius: 9999px;
+    background: var(--bib-ground, var(--ink));
   }
-
-  .field-hint {
-    @apply mt-1.5 text-sm text-violet-mist;
+  .bib-hole-tl { left: 3cqw; top: 3cqw; }
+  .bib-hole-tr { right: 3cqw; top: 3cqw; }
+  .bib-hole-bl { left: 3cqw; bottom: 15cqw; }
+  .bib-hole-br { right: 3cqw; bottom: 15cqw; }
+  .bib-head { display: flex; align-items: baseline; justify-content: space-between; }
+  .bib-brand { font-size: 7.4cqw; }
+  .bib-place {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 2.9cqw;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
   }
-
-  /* Marks anything the organiser has not yet confirmed. Loud on purpose. */
-  .placeholder-flag {
-    @apply inline-flex items-center gap-1.5 rounded-md border border-dashed border-glow/70
-           bg-glow/10 px-2 py-0.5 text-xs font-medium text-glow;
+  .bib-center { display: flex; align-items: center; justify-content: center; }
+  .bib-number { font-size: 34cqw; line-height: 0.8; }
+  .bib-blankwrap { display: flex; width: 100%; flex-direction: column; align-items: center; gap: 2.4cqw; }
+  .bib-line { display: block; border-bottom: 0.8cqw solid rgba(13, 11, 18, 0.35); }
+  .bib-note {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 2.9cqw;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: rgba(13, 11, 18, 0.65);
   }
+  .bib-namebox { min-height: 10cqw; }
+  .bib-name { font-size: 9cqw; line-height: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .bib-tear {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 3cqw;
+    margin: 3.5cqw -5cqw 0;
+    padding: 2.4cqw 5cqw;
+    border-top: 2px dashed rgba(13, 11, 18, 0.45);
+  }
+  .bib-cat { padding: 0.8cqw 2.4cqw; font-size: 5.4cqw; line-height: 1; }
+  .bib-mt { margin-top: 6cqw; }
+  /* One colour per category, everywhere it appears. */
+  .cat-um_student { background: var(--gold); color: var(--ink); }
+  .cat-um_staff { background: var(--lavender); color: var(--ink); }
+  .cat-um_alumni { background: var(--emerald); color: var(--paper); }
+  .cat-public { background: var(--paper); color: var(--ink); box-shadow: inset 0 0 0 3px var(--ink); }
 }
 
-/* The single page-load moment: the hero title rises once. Nothing else animates on scroll. */
-@keyframes rise {
-  from { opacity: 0; transform: translateY(14px); }
-  to   { opacity: 1; transform: none; }
-}
+/* ---- Motion ---------------------------------------------------------------
+   Each of these has a reason: order of reading, arrival, progress, feedback,
+   celebration. All of it stops under reduced motion. */
 
-.rise {
-  animation: rise 700ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+@keyframes drop {
+  0% { opacity: 0; translate: 0 -0.5em; scale: 0.94; }
+  60% { opacity: 1; translate: 0 0.04em; scale: 1.02; }
+  100% { opacity: 1; translate: 0 0; scale: 1; }
 }
+.drop { animation: drop 900ms cubic-bezier(0.34, 1.4, 0.64, 1) both; }
+.drop-2 { animation-delay: 110ms; }
+.drop-3 { animation-delay: 240ms; }
+.drop-4 { animation-delay: 380ms; }
+.drop-5 { animation-delay: 560ms; }
+.drop-6 { animation-delay: 760ms; }
+
+@keyframes twinkle {
+  0%, 100% { opacity: 1; scale: 1; }
+  50% { opacity: 0.35; scale: 0.6; }
+}
+.twinkle { animation: twinkle 3.4s ease-in-out infinite; }
+.twinkle-2 { animation-delay: 0.9s; animation-duration: 4.1s; }
+.twinkle-3 { animation-delay: 1.8s; animation-duration: 3.1s; }
+
+@keyframes burst-out {
+  0% { opacity: 0; translate: 0 0; scale: 0.2; }
+  30% { opacity: 1; }
+  100% { opacity: 0; translate: var(--bx, 0) var(--by, 0); scale: 1; }
+}
+.burst-out { animation: burst-out 1400ms cubic-bezier(0.2, 0.8, 0.3, 1) both; }
+
+@keyframes pop {
+  0% { scale: 0.6; opacity: 0; }
+  70% { scale: 1.12; opacity: 1; }
+  100% { scale: 1; opacity: 1; }
+}
+.pop { animation: pop 420ms cubic-bezier(0.34, 1.4, 0.64, 1) both; }
+
+.tick-path { stroke-dasharray: 1 2; transition: stroke-dashoffset 500ms ease-out; }
+.tick-path--pending { stroke-dashoffset: 1; }
+.tick-path--drawn { stroke-dashoffset: 0; }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
   }
+  .twinkle { animation: none; }
+  .trail-stop { opacity: 1 !important; }
+  .burst-out { display: none; }
+  .reveal--pending { opacity: 1; translate: 0 0; scale: 1; rotate: var(--tilt, 0deg); }
+  .trail-line--pending, .tick-path--pending { stroke-dashoffset: 0; }
 }
+
+/* ---- Hero sizing (plain CSS: sized against both width and height so the cover always fits) ---- */
+.hero-witches { font-size: min(27vw, 17dvh); line-height: 0.84; }
+.hero-glow { font-size: min(24vw, 26dvh); }
+.hero-run { font-size: min(30vw, 19dvh); line-height: 0.84; }
+@media (min-width: 768px) {
+  .hero-witches { font-size: min(12vw, 14.5dvh); }
+  .hero-glow { font-size: min(21vw, 28.5dvh); }
+  .hero-run { font-size: min(14.5vw, 16.5dvh); }
+}
+.glow-echo { translate: 0.04em 0.05em; color: var(--lavender); }
+.glow-ghost { translate: -0.035em -0.04em; color: transparent; -webkit-text-stroke: 2px var(--paper); }

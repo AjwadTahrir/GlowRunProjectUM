@@ -4,17 +4,23 @@ export default {
   theme: {
     extend: {
       colors: {
-        // The four brand colours, plus two support tones mixed from them, so
-        // surfaces can step apart without introducing a fifth hue.
+        // The four client colours carry the page.
         ink: '#0D0B12',
-        violet: { DEFAULT: '#30104B', deep: '#1B0A2B', mist: '#B9A8D0' },
-        glow: '#F5C542',
+        purple: '#30104B',
+        gold: '#F5C542',
+        paper: '#F4F0E8',
+        // Approved support. Lavender is the glow: halftone halos, sparkles, echoes. Never behind
+        // paper or gold text. Emerald is the witchy accent, used sparingly.
+        lavender: '#A388EE',
+        emerald: '#094F39',
+        signal: '#F87171', // errors only
       },
       fontFamily: {
-        display: ['Fraunces', 'Georgia', 'serif'],
-        sans: ['Outfit', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        // One family, three voices: compressed for facts, expanded italic for energy, normal for reading.
+        display: ['"Archivo Variable"', '"Arial Narrow"', 'sans-serif'],
+        sans: ['"Archivo Variable"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        mono: ['"IBM Plex Mono"', 'ui-monospace', 'monospace'],
       },
-      maxWidth: { prose: '68ch' },
     },
   },
   plugins: [],

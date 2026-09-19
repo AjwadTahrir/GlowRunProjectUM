@@ -1,68 +1,112 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { AlertTriangle, X } from 'lucide-react';
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import type { Unconfirmed } from '../config/event';
 
-export function Section({
+/**
+ * Section ground. Sections alternate between the two plates, ink and purple.
+ * Purple plates are cut on a slant so the page reads like sheets laid over each
+ * other, not stacked boxes. `--ground` tells ticket notches what to cut through to.
+ */
+export function SectionShell({
   id,
-  title,
-  lede,
+  tone = 'ink',
+  cut,
+  className = '',
   children,
 }: {
   id: string;
-  title: string;
-  lede?: string;
+  tone?: 'ink' | 'purple';
+  cut?: 'a' | 'b';
+  className?: string;
   children: ReactNode;
 }) {
+  const shape = cut === 'a' ? 'cut-a' : cut === 'b' ? 'cut-b' : '';
   return (
-    <section id={id} aria-labelledby={`${id}-heading`} className="border-t border-white/[0.07] py-16 sm:py-20">
-      <div className="shell">
-        <h2 id={`${id}-heading`} className="section-heading">
-          {title}
-        </h2>
-        {lede && <p className="lede">{lede}</p>}
-        <div className="mt-8">{children}</div>
-      </div>
+    <section
+      id={id}
+      aria-labelledby={`${id}-heading`}
+      className={`relative ${tone === 'purple' ? 'bg-purple' : ''} ${shape} ${className}`}
+      style={{ ['--ground' as string]: tone === 'purple' ? 'var(--purple)' : 'var(--ink)' } as CSSProperties}
+    >
+      {children}
     </section>
   );
 }
 
 /**
- * Renders an organiser-supplied value, or a visible flag when it has not been
- * confirmed yet. Nothing unconfirmed can quietly pass for official information.
+ * Section heading. The caller sets the voice (compressed, expanded italic, outline)
+ * and the size, so no two headings are cut from the same template. The folio is the
+ * section's stop number on the route.
  */
-export function Detail({ label, field }: { label: string; field: Unconfirmed<string> }) {
+export function Title({
+  id,
+  index,
+  className = '',
+  style,
+  folioClass = '',
+  children,
+}: {
+  id: string;
+  index: string;
+  className?: string;
+  style?: CSSProperties;
+  folioClass?: string;
+  children: ReactNode;
+}) {
   return (
-    <div>
-      <dt className="text-sm text-violet-mist">{label}</dt>
-      <dd className="mt-1 text-lg text-white">
-        {field.confirmed ? (
-          field.value
-        ) : (
-          <span className="placeholder-flag">
-            <AlertTriangle aria-hidden className="h-3.5 w-3.5" />
-            Not confirmed
-          </span>
-        )}
+    <h2 id={`${id}-heading`} className={className} style={style}>
+      {children}
+      <span aria-hidden className={`folio ${folioClass}`}>
+        {index}
+      </span>
+    </h2>
+  );
+}
+
+/**
+ * The empty line on a printed form. Stands in for anything the organiser has not
+ * confirmed. Sighted readers see a blank to be filled in; screen readers are told.
+ */
+export function Blank({ w = '9ch' }: { w?: string }) {
+  return (
+    <>
+      <span className="blank" style={{ ['--w' as string]: w }} aria-hidden />
+      <span className="sr-only">To be announced</span>
+    </>
+  );
+}
+
+/** A confirmed value, or a blank line. Never a placeholder passed off as fact. */
+export function Value({ field, w }: { field: Unconfirmed<string>; w?: string }) {
+  return field.confirmed ? <>{field.value}</> : <Blank w={w} />;
+}
+
+/** A programme row: label, dotted leader, value. Takes its colour from where it is printed. */
+export function Leader({ label, field, w }: { label: string; field: Unconfirmed<string>; w?: string }) {
+  return (
+    <div className="leader py-3">
+      <dt className="tech-on shrink-0">{label}</dt>
+      <dd className="display display-s text-right">
+        <Value field={field} w={w} />
       </dd>
     </div>
   );
 }
 
-export function MissingAsset({ what }: { what: string }) {
-  return (
-    <p className="panel border-dashed text-violet-mist">
-      <span className="placeholder-flag">
-        <AlertTriangle aria-hidden className="h-3.5 w-3.5" />
-        Missing
-      </span>{' '}
-      The organiser has not supplied the {what} yet. Add the file to <code className="text-white">web/public/</code> and
-      point <code className="text-white">eventConfig.posters</code> at it.
-    </p>
-  );
-}
-
-/** A poster that can be opened full size, by click or by keyboard. */
-export function PosterFrame({ src, alt, caption }: { src: string; alt: string; caption?: string }) {
+/**
+ * Artwork opens full size. The poster is the work; the frame stays out of its way.
+ * It is shown taped to the page: tilt and tape come from the section that uses it.
+ */
+export function Artwork({
+  src,
+  alt,
+  caption,
+  className = '',
+}: {
+  src: string;
+  alt: string;
+  caption?: string;
+  className?: string;
+}) {
   const [open, setOpen] = useState(false);
   const closeRef = useRef<HTMLButtonElement>(null);
 
@@ -75,35 +119,30 @@ export function PosterFrame({ src, alt, caption }: { src: string; alt: string; c
   }, [open]);
 
   return (
-    <figure>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="block w-full overflow-hidden rounded-2xl border border-white/10"
-        aria-label={`${alt} — open full size`}
-      >
-        <img src={src} alt={alt} loading="lazy" className="h-auto w-full" />
+    <figure className={className}>
+      <button type="button" onClick={() => setOpen(true)} className="block w-full" aria-label={`${alt}, open full size`}>
+        <img src={src} alt={alt} loading="lazy" className="h-auto w-full border-4 border-paper" />
       </button>
-      {caption && <figcaption className="mt-2 text-sm text-violet-mist">{caption}</figcaption>}
+      {caption && <figcaption className="tech mt-3">{caption}</figcaption>}
 
       {open && (
         <div
           role="dialog"
           aria-modal="true"
           aria-label={alt}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-ink/95 p-4"
+          className="fixed inset-0 z-[110] flex items-center justify-center bg-ink/95 p-4"
           onClick={() => setOpen(false)}
         >
           <button
             ref={closeRef}
             type="button"
             onClick={() => setOpen(false)}
-            className="absolute right-4 top-4 rounded-full border border-white/25 p-2 text-white"
+            className="btn-outline absolute right-4 top-4"
             aria-label="Close"
           >
-            <X aria-hidden className="h-5 w-5" />
+            Close
           </button>
-          <img src={src} alt={alt} className="max-h-full max-w-full rounded-xl" />
+          <img src={src} alt={alt} className="max-h-full max-w-full" />
         </div>
       )}
     </figure>
