@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'react';
 import { eventConfig } from '../config/event';
 import type { EventStatus } from '../lib/api';
-import { Burst, FinishFlag, Mark, Moon, Sparkle, Stars, Tape, Trail, type StarSpec } from './Graphics';
+import { Burst, FinishFlag, Mark, Sparkle, Stars, Tape, Trail, type StarSpec } from './Graphics';
 import { Blank } from './ui';
 
 /**
@@ -43,7 +43,6 @@ export function Cover({ status }: { status: EventStatus | null }) {
   return (
     <div id="top" className="relative flex min-h-[100dvh] flex-col bg-purple">
      <div className="relative isolate flex flex-1 flex-col overflow-hidden pt-14">
-      <Moon size="min(30vw, 40dvh)" className="right-[10vw] top-[14dvh] md:right-[7vw] md:top-[10dvh]" style={{ zIndex: -1 }} />
       <Stars items={STARS} className="-z-10" />
 
       {/* The route: draws itself from the start dot to the finish flag beside Register. */}

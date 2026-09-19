@@ -5,3 +5,4 @@ dist/
 .private-uploads/
 *.log
 service-account*.json
+.claude/
