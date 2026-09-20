@@ -1,5 +1,12 @@
 import { useEffect, useState } from 'react';
 
+const SWITCHES = [
+  ['dbg-nograin', 'grain OFF'],
+  ['dbg-noext', 'ext OFF'],
+  ['dbg-sticky', 'sticky'],
+  ['dbg-nofixedbars', 'bars OFF'],
+] as const;
+
 /**
  * Diagnostics for layout problems that only show on a real phone. Rendered only when
  * the URL carries ?debug, so it is invisible to everyone else. Remove once the top-gap
@@ -13,6 +20,11 @@ import { useEffect, useState } from 'react';
  */
 export function DebugOverlay() {
   const [rows, setRows] = useState<string[]>([]);
+  const [on, setOn] = useState<string[]>([]);
+
+  useEffect(() => {
+    for (const [cls] of SWITCHES) document.documentElement.classList.toggle(cls, on.includes(cls));
+  }, [on]);
 
   useEffect(() => {
     const read = () => {
@@ -68,26 +80,50 @@ export function DebugOverlay() {
         aria-hidden
         style={{ position: 'fixed', left: 0, right: 0, top: 'env(safe-area-inset-top, 0px)', height: 3, background: '#2d7bff', zIndex: 9998, pointerEvents: 'none' }}
       />
-      <pre
-        aria-hidden
+      <div
         style={{
           position: 'fixed',
           left: 0,
           right: 0,
           bottom: 0,
           zIndex: 9999,
-          margin: 0,
-          padding: '6px 8px calc(6px + env(safe-area-inset-bottom, 0px))',
           background: 'rgba(0,0,0,0.88)',
-          color: '#9dff9d',
-          font: '10px/1.35 ui-monospace, monospace',
-          whiteSpace: 'pre-wrap',
-          wordBreak: 'break-all',
-          pointerEvents: 'none',
+          padding: '6px 8px calc(6px + env(safe-area-inset-bottom, 0px))',
         }}
       >
-        {rows.join('\n')}
-      </pre>
+        <div style={{ display: 'flex', gap: 6, marginBottom: 6 }}>
+          {SWITCHES.map(([cls, label]) => (
+            <button
+              key={cls}
+              type="button"
+              onClick={() => setOn((cur) => (cur.includes(cls) ? cur.filter((c) => c !== cls) : [...cur, cls]))}
+              style={{
+                flex: 1,
+                padding: '8px 4px',
+                font: '600 11px ui-monospace, monospace',
+                background: on.includes(cls) ? '#9dff9d' : '#333',
+                color: on.includes(cls) ? '#000' : '#fff',
+                border: 0,
+              }}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        <pre
+          aria-hidden
+          style={{
+            margin: 0,
+            color: '#9dff9d',
+            font: '10px/1.35 ui-monospace, monospace',
+            whiteSpace: 'pre-wrap',
+            wordBreak: 'break-all',
+            pointerEvents: 'none',
+          }}
+        >
+          {rows.join('\n')}
+        </pre>
+      </div>
     </>
   );
 }
