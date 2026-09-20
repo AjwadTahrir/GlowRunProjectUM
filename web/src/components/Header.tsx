@@ -26,14 +26,6 @@ export function Header({ menuOpen, onMenuChange }: { menuOpen: boolean; onMenuCh
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 h-[var(--header-h)] bg-ink pt-[var(--safe-top)]">
-      {/*
-        iOS Safari draws the page's own content under the status bar and Dynamic Island, and
-        reports no safe-area inset for it, so a fixed header cannot reach that strip by
-        padding. Extending the header's background upward, past the top edge, fills it with
-        the header colour instead of whatever section is scrolling beneath. Off-screen (and
-        so invisible) everywhere else.
-      */}
-      <span aria-hidden className="pointer-events-none absolute inset-x-0 bottom-full h-24 bg-ink" />
       <div className="shell flex h-full items-center justify-between gap-6">
         <a href="#top" className="flex items-baseline gap-[0.3em] text-[1.35rem] leading-none text-paper">
           <span className="display">Witches</span>
