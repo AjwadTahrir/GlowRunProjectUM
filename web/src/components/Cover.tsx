@@ -43,7 +43,7 @@ export function Cover({ status }: { status: EventStatus | null }) {
   );
 
   return (
-    <div id="top" className="relative flex min-h-[100dvh] flex-col bg-purple">
+    <div id="top" className="relative flex flex-col bg-purple md:min-h-[100dvh]">
      <div className="relative isolate flex flex-1 flex-col overflow-hidden pt-[var(--header-h)]">
       <Stars items={STARS} className="-z-10" />
 
