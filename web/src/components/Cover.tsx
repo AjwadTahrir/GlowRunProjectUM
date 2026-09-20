@@ -59,19 +59,6 @@ export function Cover({ status }: { status: EventStatus | null }) {
           ]}
         />
       </div>
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 -z-[5] md:hidden">
-        <Trail
-          d={MOBILE_TRAIL}
-          viewBox="0 0 400 280"
-          drawNow
-          delay={700}
-          width={9}
-          stops={[
-            { at: 0, node: <span className="block h-5 w-5 rounded-full bg-gold" /> },
-            { at: 1, node: <FinishFlag size={26} /> },
-          ]}
-        />
-      </div>
 
       <div className="shell relative flex flex-1 flex-col pb-6 pt-6 md:pt-8">
         <p className="drop font-mono text-xs font-medium uppercase tracking-[0.14em] text-paper">Universiti Malaya</p>
@@ -116,6 +103,21 @@ export function Cover({ status }: { status: EventStatus | null }) {
             </span>
           </span>
           <Sparkle size={30} color="var(--paper)" className="twinkle twinkle-2 absolute -left-4 top-[2%] hidden md:block" />
+        </div>
+
+        {/* Phones: the route runs below the wordmark, in flow, so it can never cross the title. */}
+        <div className="pointer-events-none mt-6 md:hidden">
+          <Trail
+            d={MOBILE_TRAIL}
+            viewBox="0 0 400 280"
+            drawNow
+            delay={700}
+            width={9}
+            stops={[
+              { at: 0, node: <span className="block h-5 w-5 rounded-full bg-gold" /> },
+              { at: 1, node: <FinishFlag size={26} /> },
+            ]}
+          />
         </div>
       </div>
      </div>
