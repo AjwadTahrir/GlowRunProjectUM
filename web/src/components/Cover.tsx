@@ -27,10 +27,9 @@ const tilt = (deg: number) => ({ '--tilt': `${deg}deg` }) as CSSProperties;
 
 const DESKTOP_TRAIL =
   'M30 300 C180 380 330 310 500 372 C640 420 700 340 660 314 C620 290 590 360 660 392 C760 432 900 428 1040 412 S1290 380 1390 372';
-// A small coil near the start, then a mostly horizontal run to the flag: a flat banner, so the
+// A single, nearly flat line from the start dot to the flag: a slim banner under the title, so the
 // purple cover stays short and Register stays high on a phone.
-const MOBILE_TRAIL =
-  'M20 26 C42 30 62 62 92 76 C128 92 176 74 164 46 C154 22 108 20 100 46 C94 66 122 92 176 100 C236 110 300 98 336 118 S368 130 384 134';
+const MOBILE_TRAIL = 'M20 24 C100 14 180 36 260 32 S350 28 384 34';
 
 export function Cover({ status }: { status: EventStatus | null }) {
   const registration = status?.registration;
@@ -112,7 +111,7 @@ export function Cover({ status }: { status: EventStatus | null }) {
         <div className="pointer-events-none md:hidden">
           <Trail
             d={MOBILE_TRAIL}
-            viewBox="0 0 400 160"
+            viewBox="0 0 400 64"
             drawNow
             delay={700}
             width={9}
