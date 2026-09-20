@@ -109,7 +109,7 @@ export function Cover({ status }: { status: EventStatus | null }) {
         </div>
 
         {/* Phones: the route runs below the wordmark, in flow, so it can never cross the title. */}
-        <div className="pointer-events-none mt-6 md:hidden">
+        <div className="pointer-events-none md:hidden">
           <Trail
             d={MOBILE_TRAIL}
             viewBox="0 0 400 160"
