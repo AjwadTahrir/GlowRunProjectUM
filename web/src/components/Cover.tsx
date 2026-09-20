@@ -27,7 +27,9 @@ const tilt = (deg: number) => ({ '--tilt': `${deg}deg` }) as CSSProperties;
 
 const DESKTOP_TRAIL =
   'M30 300 C180 380 330 310 500 372 C640 420 700 340 660 314 C620 290 590 360 660 392 C760 432 900 428 1040 412 S1290 380 1390 372';
-const MOBILE_TRAIL = 'M22 84 C110 74 140 164 220 152 S330 104 372 214';
+// A coil under the NIGHT RUN tape (it crosses itself near 100,60), then one flowing curve to the flag.
+const MOBILE_TRAIL =
+  'M24 18 C46 24 66 72 96 92 C132 114 176 88 164 54 C154 24 108 22 100 54 C94 80 122 116 176 130 S300 138 336 176 S364 194 372 200';
 
 export function Cover({ status }: { status: EventStatus | null }) {
   const registration = status?.registration;
@@ -109,7 +111,7 @@ export function Cover({ status }: { status: EventStatus | null }) {
         <div className="pointer-events-none mt-6 md:hidden">
           <Trail
             d={MOBILE_TRAIL}
-            viewBox="0 0 400 280"
+            viewBox="0 0 400 218"
             drawNow
             delay={700}
             width={9}
